@@ -1,17 +1,35 @@
 <!DOCTYPE html>
 <html lang="">
-  <head>
+
+<head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
-    <title><%= htmlWebpackPlugin.options.title %></title>
-  </head>
-  <body>
-    <noscript>
-      <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
-    </noscript>
+    <meta name="language" content="zh-CN">
+    <meta name="title" content="光遇攻略站">
+    <meta name="author" content="光遇攻略站">
+    <meta name="description" content="光遇攻略站">
+    <meta name="keywords" content="光遇攻略站,sky,sky children of the light,windhide,WindHide">
+    <meta name="robots" content="All">
+    <title>光遇攻略站</title>
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="/api/css/windhide_load.css" />
+    <link rel="stylesheet" type="text/css" href="/api/css/windhide_bg.css" />
+    <link rel="stylesheet" type="text/css" href="/api/css/windhide_pc.css" />
+    <link rel="stylesheet" type="text/css" href="/api/css/windhide_mp.css" />
+    <link rel="stylesheet" type="text/css" href="/api/css/login.css" />
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="//fonts.googleapis.com/css?family=Roboto:400,100,300,500,700,900&subset=latin,latin-ext" rel="stylesheet" />
+    <script src="/api/js/jquery-3.2.1.min.js"></script>
+    <script src="/api/js/windhide_judge.js"></script>
+    <script src="/api/js/windhide_pc.js"></script>
+    <script src="/api/js/windhide_mp.js"></script>
+    <script src="/api/js/login.js"></script>
+</head>
+
+<body>
+    <canvas class="fireworks" style="position:fixed;left:0;top:0;z-index:99999999;pointer-events:none;"></canvas>
+    <script src="/api/js/djtx.js"></script>
     <div id="app"></div>
-    <!-- built files will be auto injected -->
-  </body>
+</body>
+
 </html>
