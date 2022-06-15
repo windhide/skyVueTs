@@ -5,7 +5,7 @@
 		</div>
 
 		<div style="width:80%;height:80%;margin:30px auto">
-  			  <el-table :data="spritreport"  @row-click="cellmouseenter" border >
+  			  <el-table :data="spritreport.values"  @row-click="cellmouseenter" border >
   			      <el-table-column  prop="reportListTitle"  label="标题"  />
   			      <el-table-column  prop="accountUsername"  label="用户" width="130" />
   			      <el-table-column  prop="reportTime"  label="时间" width="130" />
@@ -19,19 +19,19 @@
 			<!-- 到底了-提示 -->
 		</div>
 
-  		<el-dialog v-model="lookVisible" title="🤬揭露骗子🤬" width="50%"  draggable :before-close="SeehandleClose" :append-to-body="true">
-				{{this.SelectReport.reportListTitle}}
+  		<el-dialog v-model="lookVisible" title="🤬揭露骗子🤬" width="50%"  draggable :before-close="SeehandleClose()" :append-to-body="true" destroy-on-close>
+				{{SelectReport.reportListTitle}}
 		  <el-divider />
 			<el-tabs tab-position="left" class="demo-tabs">
-    			<el-tab-pane label="内容" selected >{{this.SelectReport.reportListMesseage}}</el-tab-pane>
-    			<el-tab-pane label="图片" class="demo-image__lazy" style="width:70%"><el-image v-for="url in SelectedImg" :key="url" :src="'/api/image/'+url"  /></el-tab-pane>
-				<el-tab-pane disabled :label="'发布用户 > '+this.SelectReport.accountUsername" />
-    			<el-tab-pane disabled :label="'时间 > '+this.SelectReport.reportTime" />
+    			<el-tab-pane label="内容" selected >{{SelectReport.reportListMesseage}}</el-tab-pane>
+    			<el-tab-pane label="图片" class="demo-image__lazy" style="width:70%"><el-image v-for="url in SelectedImg.values" :key="url" :src="'/api/image/'+url"  /></el-tab-pane>
+				<el-tab-pane disabled :label="'发布用户 > '+SelectReport.accountUsername" />
+    			<el-tab-pane disabled :label="'时间 > '+SelectReport.reportTime" />
   			</el-tabs>
   		</el-dialog>
 
-		  <el-dialog v-model="EditVisible" title="自己发布的消息" width="50%"  draggable :before-close="EdithandleClose" :append-to-body="true">
-				<el-table :data="spritreport.filter(data => this.getUsername(data.accountUsername))" border >
+		  <el-dialog v-model="EditVisible" title="自己发布的消息" width="50%"  draggable :before-close="EdithandleClose()" :append-to-body="true" destroy-on-close>
+				<el-table :data="spritreport.filter((data:any) => getUsername(data.accountUsername))" border >
   			      <el-table-column  prop="reportListTitle"  label="标题"  />
   			      <el-table-column  prop="accountUsername"  label="用户" />
   			      <el-table-column  prop="reportTime"  label="时间" />
@@ -44,7 +44,7 @@
   			  </el-table>
   		 </el-dialog>
 
-		<el-dialog v-model="dialogVisible" title="删除" width="30%" :before-close="SubmitForm" :append-to-body="true">
+		<el-dialog v-model="dialogVisible" title="🤬举报骗子🤬" width="30%" :before-close="SubmitForm" :append-to-body="true" destroy-on-close>
   			<el-form :model="form" label-width="120px">
   			  <el-form-item label="举报标题">
   			    <el-input v-model="form.reportListTitle" />
@@ -54,6 +54,7 @@
   			  </el-form-item>
 			  <el-form-item label="上传证据">
   			    	<el-upload ref="reportAdd"  action="/api/upload" list-type="picture-card" :on-preview="handlePictureCardPreview" :on-remove="handleRemove" :file-list="fileList"  :limit="5">
+							<el-icon><Plus /></el-icon>
  					 </el-upload>
   			  </el-form-item>
   			</el-form>
@@ -66,156 +67,160 @@
   		</el-dialog>
 
 </template>
-<script>
-export default {
-  data() {
-    return {
-        spritreport:[],
-        SelectReport:null,
-		dialogVisible:false,
-		lookVisible:false,
-		EditVisible:false,
-		dialogImageUrl:'',
-		fileList:[],
-		SelectedImg:[],
-		form:{
+<script setup lang="ts">
+		import { ServerDataRequest,notify_messeage } from '@/apis/defineFunction'
+		import { Plus } from '@element-plus/icons-vue'
+		import {ElMessageBox,UploadInstance} from 'element-plus'
+		import {reactive, ref} from 'vue'
+		import router from '@/router/routerIndex'
+
+    	let reportAdd = ref<UploadInstance>()
+        let SelectReport:any=ref({})
+		let dialogVisible=ref(false)
+		let lookVisible=ref(false)
+		let EditVisible=ref(false)
+		let dialogImageUrl=ref('')
+		let spritreport:any=reactive([]) 
+		let fileList:any=reactive([])
+		// 	const fileList = ref<UploadUserFile[]>([
+    	//   {
+    	//     name: Store.state.Microstore.logourl.split('?')[0].split('/')[Store.state.Microstore.logourl.split('?')[0].split('/').length - 1],
+    	//     url: Store.state.Microstore.logourl
+    	//   }])
+		let SelectedImg:String[]=[]
+		let form:any=ref({
 			reportListTitle:'',
-			reportListMesseage:'',
-		},
-    };
-  },
-  methods:{
-	GoLogin(){
-		  this.$router.push('/login');
-	},
-	statsForm(){
-		return this.reportListTitle != '' && this.reportListMesseage != '' && this.fileList.length != 0
-	},
-	handleDelete(index, row){
+			reportListMesseage:''
+	 	})
+		const upload = ref<UploadInstance>()
+      ServerDataRequest("/report/select").then((res) => { spritreport.values = res})
+
+	function GoLogin(){
+		  router.push('/login');
+	}
+	function statsForm(){
+		return form.value.reportListTitle != '' && form.value.reportListMesseage != '' && fileList.length != 0
+	}
+	function handleDelete(index:any, row:any){
         let id = row.reportListID;
-        this.$confirm('此操作将删除>>'+row.reportListTitle+'此条数据, 是否继续?', '提示', {
+        ElMessageBox.confirm('此操作将删除>>'+row.reportListTitle+'此条数据, 是否继续?', '提示', {
              confirmButtonText: '确定',
              cancelButtonText: '取消',
              type: 'warning',
         }).then(async () => {
-            await this.ServerDataRequest("/report/delete?id="+id).then(async (res) =>{
+            await ServerDataRequest("/report/delete?id="+id).then(async (res) =>{
 				if(res){
-					await this.notify_messeage("删除成功","success")
+					await notify_messeage("删除成功","success")
 						let AllImage = row.reportListimage+','
 						while(AllImage.indexOf(",") != -1){
 							let lstar = AllImage.indexOf(",")
 							AllImage = AllImage.replace(',',')')
 							let lend = AllImage.indexOf(",")
 							if(lstar != -1 && lend != -1)
-								await this.ServerDataRequest("/uploadDelete?Filename="+AllImage.substring(lstar+1,lend))
+								await ServerDataRequest("/uploadDelete?Filename="+AllImage.substring(lstar+1,lend))
 						}
-					await this.ServerDataRequest("report").then((res) => { this.spritreport = res})
+					await ServerDataRequest("report").then((res) => { spritreport.values = res})
 				}else{
-					this.notify_messeage("删除失败","warning")		
+					notify_messeage("删除失败","warning")		
 				}
 			})
         }).catch(() => {
-            this.notify_messeage("取消删除","warning")
-			this.ServerDataRequest("report").then((res) => { this.spritreport = res})
+            notify_messeage("取消删除","warning")
+			ServerDataRequest("report").then((res) => { spritreport.values = res})
         });
-    },
-    cellmouseenter(row, column, cell, event) {
-      this.SelectReport = row;
-	  this.SelectedImg = []
+    }
+	function cellmouseenter(row:any, column:any, cell:any, event:any) {
+      SelectReport = row;
+	  SelectedImg = reactive([])
 	  let AllImage = row.reportListimage+','
 		while(AllImage.indexOf(",") != -1){
 			let lstar = AllImage.indexOf(",")
 			AllImage = AllImage.replace(',',')')
 			let lend = AllImage.indexOf(",")
 			if(lstar != -1 && lend != -1)
-				this.SelectedImg.push(AllImage.substring(lstar+1,lend))
+				SelectedImg.push(AllImage.substring(lstar+1,lend))
 		}
-	  this.lookVisible = true; // 打开详细窗口
-    },
-	getloginUsername(){
+	  lookVisible.value = true; // 打开详细窗口
+    }
+	function getloginUsername(){
 		  return localStorage.getItem('Authorization')
-	},
-	getUsername(name){
+	}
+	function getUsername(name:any){
 		return name == localStorage.getItem('loginUsername')
-	},
-	SeehandleClose(){
-		this.lookVisible = false
-	},
-	EdithandleClose(){
-		this.EditVisible = false
-	},
-	handlePictureCardPreview(file) {
-            this.dialogImageUrl = file.url;
-            this.lookVisible = true;
-    },
-	handleRemove(file) {
-            this.ServerDataRequest("/uploadDelete?Filename="+file.response);
-    },
-	cancelAdd(){
-		this.$confirm('确定取消吗？') .then(_ => {
-                this.resetForm()
-                this.notify_messeage("用户取消",'warning')
-				this.dialogVisible = false;
-            }).catch(_=>{})
-	},
-	resetForm(){
-		this.form.reportListTitle = ""
-		this.form.reportListMesseage = ""
-		for(let i = 0;i<this.fileList.length;i++){
-            this.ServerDataRequest("/uploadDelete?Filename="+this.fileList[i].response);
+	}
+	function SeehandleClose(){
+		lookVisible.value = false
+	}
+	function EdithandleClose(){
+		EditVisible.value = false
+	}
+	function handlePictureCardPreview(file:any) {
+            dialogImageUrl.value = file.url;
+            lookVisible.value = true;
+    }
+	function handleRemove(file:any) {
+            ServerDataRequest("/uploadDelete?Filename="+file.response);
+    }
+	function cancelAdd(){
+		ElMessageBox.confirm('确定取消吗？') .then((_:any) => {
+                resetForm()
+                notify_messeage("用户取消",'warning')
+				dialogVisible.value = false;
+            }).catch((_:any)=>{})
+	}
+	function resetForm(){
+		form.value.reportListTitle = ""
+		form.value.reportListMesseage = ""
+		for(let i = 0;i<fileList.length;i++){
+            ServerDataRequest("/uploadDelete?Filename="+fileList.values[i].response);
 		}
-		this.fileList= []
-        this.$refs['reportAdd'].clearFiles();
-	},
-	SubmitForm(){
+		fileList= []
+        reportAdd.value!.clearFiles();
+	}
+	function SubmitForm(){
 		let imagUrl = ''
 		let year = new Date().getFullYear();	
 		let month = new Date().getMonth() +1;
 		let day = new Date().getDate();
 		imagUrl = ''
-		for(let i = 0;i<this.fileList.length;i++){
-			imagUrl += (','+this.fileList[i].response)
+		for(let i = 0;i<fileList.length;i++){
+			imagUrl += (','+fileList.values[i].response)
 		}
-		this.$confirm('确定添加吗？') .then(_ => {
-                if(this.statsForm()){
-                    let url = "/report/insert?reportListTitle="+this.form.reportListTitle + "&"
-					+ "reportListMesseage=" + this.form.reportListMesseage + "&"
+		ElMessageBox.confirm('确定添加吗？') .then((_:any) => {
+                if(statsForm()){
+                    let url = "/report/insert?reportListTitle="+form.reportListTitle + "&"
+					+ "reportListMesseage=" + form.reportListMesseage + "&"
 					+ "reportListimage=" + imagUrl + "&" 
 					+ "accountUsername=" + localStorage.getItem('loginUsername') +"&"
 					+ "reportTime=" + year+'年'+month+'月'+day+'日'
-                    this.ServerDataRequest(url).then(async (res) =>{
+                    ServerDataRequest(url).then(async (res) =>{
                     	if(res){
-							await this.notify_messeage("添加成功!",'success')
-                    	    await this.ServerDataRequest("report").then((res) => { this.spritreport = res})
-							this.form.reportListTitle = ""
-							this.form.reportListMesseage = ""
-                    		this.$refs['reportAdd'].clearFiles();
-							this.fileList = []
+							await notify_messeage("添加成功!",'success')
+                    	    await ServerDataRequest("report").then((res) => { spritreport.values = res})
+							form.reportListTitle = ""
+							form.reportListMesseage = ""
+                    		reportAdd.value!.clearFiles()
+							fileList = []
 							setTimeout(() => {
-								this.dialogVisible = false;
+								dialogVisible.value = false;
                        		}, 500);
 						}
 						else
-							await this.notify_messeage("添加失败","error")
+							await notify_messeage("添加失败","error")
                     }).catch(async (res) =>{
-                        await this.notify_messeage("由于服务器问题添加失败!",'error')
+                        await notify_messeage("由于服务器问题添加失败!",'error')
                         await resetForm();
                     });
                 }else{
-                    this.notify_messeage("你的数据填写不完全，请检查！",'error')
+                    notify_messeage("你的数据填写不完全，请检查！",'error')
                 }
             }).catch(() => {
-                this.resetForm()
-                this.notify_messeage("用户取消",'warning')
-				this.dialogVisible = false;
+                resetForm()
+                notify_messeage("用户取消",'warning')
+				dialogVisible.value = false;
             })
 
-	},
-  },
-  created() {
-      this.ServerDataRequest("/report/select").then((res) => { this.spritreport = res})
-  },
-}
+	}
 </script>
 
 

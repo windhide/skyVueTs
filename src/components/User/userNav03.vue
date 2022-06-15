@@ -19,7 +19,7 @@
             <el-col  v-for="(item, index) in Sprit.values" :key="'sprit_'+index" :span="4" v-if="true">
             <div class="demo-image__preview">
               <el-card :body-style="{ padding: '0px' }">
-                <b><span style="color:red">{{item.spritName}}</span></b>
+                <b><span style="color:red"> {{item.spritName}} </span></b>
                 <br />
                 <el-image style="width: 200px; height: 300px;padding-top: 10px" :src="$staticData+item.spritLink" :preview-src-list="srcList" fit="contain" @click="imageClick($staticData+item.spritCost)" :hide-on-click-modal="true" :preview-teleported="true" />
                   <div class="bottom" style="padding: 10px">
@@ -41,7 +41,6 @@
   import { ServerDataRequest,colorFuntion,$staticData } from '@/apis/defineFunction'
   import {reactive, ref, watch} from 'vue'
   
-  let visible = ref(false)
   let UserSelectSeason = ref('全部')
   let UserSelectMaxMap = ref('全部')
   let sereachData = ref('')
@@ -52,7 +51,6 @@
   let MaxMap:any = reactive([])
   let Sprit:any = reactive([])
   let srcList = ['https://fuss10.elemecdn.com/a/3f/3302e58f9a181d2509f3dc0fa68b0jpeg.jpeg']
- 
   //加数据
   ServerDataRequest('/SeasonOrActivity/daohang').then((res)=>{SeasonOrActivity.values = res})
   ServerDataRequest("/sprit/SpritPage").then((res)=>{Pages.value = res})
