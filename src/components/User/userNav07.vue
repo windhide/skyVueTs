@@ -114,7 +114,7 @@
 		for(let i = 0;i<fileList.value.length;i++){
             ServerDataRequest("/uploadDelete?Filename="+fileList.value[i].response);
 		}
-		fileList.value.splice(0,999)
+		fileList.length = 0
         reportAdd.value!.clearFiles();
 	}
 	function SubmitForm(){
@@ -136,11 +136,11 @@
                     ServerDataRequest(url).then(async (res) =>{
                     	if(res){
 							await notify_messeage("添加成功!",'success')
-                    	    await ServerDataRequest("/report/select").then((res) => { spritReport.splice(0,9999);spritReport.push(...res)})
+                    	    await ServerDataRequest("/report/select").then((res) => { spritReport.length = 0; spritReport.push(...res)})
 							form.value.reportListTitle = ""
 							form.value.reportListMesseage = ""
                     		reportAdd.value!.clearFiles()
-							fileList.value.splice(0,999)
+							fileList.length = 0
 							setTimeout(() => {
 								dialogVisible.value = false;
                        		}, 500);
@@ -179,20 +179,20 @@
 							if(lstar != -1 && lend != -1)
 								await ServerDataRequest("/uploadDelete?Filename="+AllImage.substring(lstar+1,lend))
 						}
-					await ServerDataRequest("/report/select").then((res) => { spritReport.splice(0,9999);spritReport.push(...res)})
+					await ServerDataRequest("/report/select").then((res) => { spritReport.length = 0; spritReport.push(...res)})
 				}else{
 					notify_messeage("删除失败","warning")		
 				}
 			})
         }).catch(() => {
             notify_messeage("取消删除","warning")
-			ServerDataRequest("/report/select").then((res) => { spritReport.splice(0,9999);spritReport.push(...res)})
+			ServerDataRequest("/report/select").then((res) => { spritReport.length = 0; spritReport.push(...res)})
         });
     }
 
 	function cellmouseenter(row:any, column:any, cell:any, event:any) {
       SelectReport.value = row;
-	  SelectedImg.splice(0,999)
+	  SelectedImg.length = 0
 	  let AllImage = row.reportListimage+','
 		while(AllImage.indexOf(",") != -1){
 			let lstar = AllImage.indexOf(",")
@@ -202,7 +202,6 @@
 				SelectedImg.push(AllImage.substring(lstar+1,lend))
 		}
 	  lookVisible.value = true
-	  console.log(lookVisible.value)
     }
 	function SeehandleClose(){
 		lookVisible.value = false

@@ -61,7 +61,7 @@
     
     function cellmouseenter(row:any, column:any, cell:any, event:any) {
         SelectReprint.value = row;
-        ReprintTimer.splice(0,99999)
+        ReprintTimer.length = 0
         for (let i = 0; i < Reprint.length; i++) {
           if (Reprint[i].spritID == SelectReprint.value.spritID) {
               ReprintTimer.push(Reprint[i].reprintTime);
@@ -85,7 +85,7 @@
     }
     
     function UserSelect() {
-        CountReprint.splice(0,999)
+        CountReprint.length = 0
         if (Count_Sprit_Select.value != "选择复刻次数") {
           for (let i = 0; i < Reprint.length; i++) {
             if (Reprint[i].count == Count_Sprit_Select.value) {
