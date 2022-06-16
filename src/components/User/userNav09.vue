@@ -34,7 +34,6 @@
 
     let talkMesseage:any = reactive([])
     let Messeage = ref('')
-    let online = ref(false)
 
     ServerDataRequest("/talkMesseage/select").then(res =>{talkMesseage.splice(0,99999999);talkMesseage.push(...res)})
     setInterval(() => {
