@@ -38,55 +38,55 @@
 </template>
 
 <script setup lang="ts">
-  import { ServerDataRequest,colorFuntion,$staticData } from '@/apis/defineFunction'
-  import {reactive, ref, watch} from 'vue'
-  
-  let UserSelectSeason = ref('全部')
-  let UserSelectMaxMap = ref('全部')
-  let sereachData = ref('')
-  let Pages = ref(0)
-  let NowPages = ref(1)
-  let showPage = ref(1)
-  let SeasonOrActivity:any = reactive([])
-  let MaxMap:any = reactive([])
-  let Sprit:any = reactive([])
-  let srcList = ['https://fuss10.elemecdn.com/a/3f/3302e58f9a181d2509f3dc0fa68b0jpeg.jpeg']
-  //加数据
-  ServerDataRequest('/SeasonOrActivity/daohang').then((res)=>{SeasonOrActivity.values = res})
-  ServerDataRequest("/sprit/SpritPage").then((res)=>{Pages.value = res})
-  ServerDataRequest("/MaxMap/select").then((res)=>{MaxMap.values = res})
-  selectBySpritsPage();
+    import { ServerDataRequest,colorFuntion,$staticData } from '@/apis/defineFunction'
+    import {reactive, ref, watch} from 'vue'
+    
+    let UserSelectSeason = ref('全部')
+    let UserSelectMaxMap = ref('全部')
+    let sereachData = ref('')
+    let Pages = ref(0)
+    let NowPages = ref(1)
+    let showPage = ref(1)
+    let SeasonOrActivity:any = reactive([])
+    let MaxMap:any = reactive([])
+    let Sprit:any = reactive([])
+    let srcList = ['https://fuss10.elemecdn.com/a/3f/3302e58f9a181d2509f3dc0fa68b0jpeg.jpeg']
+    //加数据
+    ServerDataRequest('/SeasonOrActivity/daohang').then((res)=>{SeasonOrActivity.values = res})
+    ServerDataRequest("/sprit/SpritPage").then((res)=>{Pages.value = res})
+    ServerDataRequest("/MaxMap/select").then((res)=>{MaxMap.values = res})
+    selectBySpritsPage();
 
-  //监听
-  watch(UserSelectSeason,_=>{ searchSprit() })
-  watch(UserSelectMaxMap,_=>{ searchSprit() })
-  watch(NowPages,_=>{ selectBySpritsPage() })
+    //监听
+    watch(UserSelectSeason,_=>{ searchSprit() })
+    watch(UserSelectMaxMap,_=>{ searchSprit() })
+    watch(NowPages,_=>{ selectBySpritsPage() })
 
-  //方法体
-  function selectBySpritsPage(){
-    ServerDataRequest("/sprit/select?id="+NowPages.value).then((res)=>{Sprit.values = res})
-  }
-  function handleCurrentChange(val:number) {
+    //方法体
+    function selectBySpritsPage(){
+        ServerDataRequest("/sprit/select?id="+NowPages.value).then((res)=>{Sprit.values = res})
+    }
+    function handleCurrentChange(val:number) {
         NowPages.value = val
-  }
-  function searchSprit(){
-     if(sereachData.value == "" && UserSelectSeason.value == '全部'  &&  UserSelectMaxMap.value == '全部'){
-        showPage.value = 1; // 显示分页条
-        NowPages.value = 1;// 重置分页条页码
-        selectBySpritsPage(); // 重新加载
-      }else{
-        showPage.value = 0;
-        let url = 
-        "/sprit/sreach?sereachData="  + sereachData.value  +
-        '&SeasonName='  + UserSelectSeason.value +
-        '&MaxmapName='  + UserSelectMaxMap.value
-        ServerDataRequest(url).then((res)=>{Sprit.values = res})
-      }
-  }
-  function imageClick(url:string){
-      srcList.push(url)
-      srcList.splice(0,1);
-  }
+    }
+    function searchSprit(){
+        if(sereachData.value == "" && UserSelectSeason.value == '全部'  &&  UserSelectMaxMap.value == '全部'){
+           showPage.value = 1; // 显示分页条
+           NowPages.value = 1;// 重置分页条页码
+           selectBySpritsPage(); // 重新加载
+        }else{
+           showPage.value = 0;
+           let url = 
+           "/sprit/sreach?sereachData="  + sereachData.value  +
+           '&SeasonName='  + UserSelectSeason.value +
+           '&MaxmapName='  + UserSelectMaxMap.value
+           ServerDataRequest(url).then((res)=>{Sprit.values = res})
+        }
+    }
+    function imageClick(url:string){
+        srcList.push(url)
+        srcList.splice(0,1);
+    }
 </script>
 
 <style scoped >

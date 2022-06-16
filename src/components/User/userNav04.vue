@@ -44,7 +44,7 @@
     // import 所需要的方法
     import { ServerDataRequest,colorFuntion,$staticData } from '@/apis/defineFunction'
     import {reactive, ref, watch} from 'vue'
-
+    
     let item:any = reactive([])
     let SeasonOrActivity:any = reactive([])
     let ItemType:any = reactive([])
@@ -60,58 +60,58 @@
         'https://fuss10.elemecdn.com/a/3f/3302e58f9a181d2509f3dc0fa68b0jpeg.jpeg',
         'https://fuss10.elemecdn.com/a/3f/3302e58f9a181d2509f3dc0fa68b0jpeg.jpeg',
         ]
-
+    
     //setup会在创建的时候调用方法完成数据的获取
     ServerDataRequest("/itemType/select").then((res) => {ItemType.values = res;});
     ServerDataRequest("/MaxMap/select").then((res) => {MaxMap.values = res;});
     ServerDataRequest("/SeasonOrActivity/daohang").then((res) => {SeasonOrActivity.values = res;});
     ServerDataRequest("/item/itemPage").then((res) => {Pages.value = res;});
     ItemPageSelect();
-
+    
     // 监听执行方法
     watch(UserSelectSeasson,_=>{getdataForTTT()})
     watch(UserSelectItemType,_=>{getdataForTTT()})
     watch(UserSelectMaxMap,_=>{getdataForTTT()})
     watch(NowPages,_=>{ItemPageSelect()})
-
+    
     function getdataForSreach(){
-      showPage.value = 0; // 隐藏分页条
-      let SreachUrl =
-        "/item/sreach?sreach=" + sereachData.value +
-        "&season=" + UserSelectSeasson.value +
-        "&Type=" + UserSelectItemType.value +
-        "&Map=" + UserSelectMaxMap.value;
-      ServerDataRequest(SreachUrl).then((res) => {item.values = res;});
-      sereachData.value = "";
-    }
-
-    function imageClick(url:any,url2:any){
-      srcList.splice(0,2)
-      srcList.push(url)
-      srcList.push(url2)
-    }
-
-    function getdataForTTT(){
-      if (UserSelectSeasson.value == "全部" && UserSelectItemType.value == "全部" &&  UserSelectMaxMap.value == "全部") {
-        showPage.value = 1; // 显示分页条
-        NowPages.value = 1; // 重置分页条页码
-        ItemPageSelect(); // 重新加载
-      } else {
-        let TTTURL =
+        showPage.value = 0; // 隐藏分页条
+        let SreachUrl =
           "/item/sreach?sreach=" + sereachData.value +
           "&season=" + UserSelectSeasson.value +
           "&Type=" + UserSelectItemType.value +
           "&Map=" + UserSelectMaxMap.value;
-        ServerDataRequest(TTTURL).then((res) => {item.values = res;});
-      }
+        ServerDataRequest(SreachUrl).then((res) => {item.values = res;});
+        sereachData.value = "";
     }
-
+    
+    function imageClick(url:any,url2:any){
+        srcList.splice(0,2)
+        srcList.push(url)
+        srcList.push(url2)
+    }
+    
+    function getdataForTTT(){
+        if (UserSelectSeasson.value == "全部" && UserSelectItemType.value == "全部" &&  UserSelectMaxMap.value == "全部") {
+          showPage.value = 1; // 显示分页条
+          NowPages.value = 1; // 重置分页条页码
+          ItemPageSelect(); // 重新加载
+        } else {
+          let TTTURL =
+            "/item/sreach?sreach=" + sereachData.value +
+            "&season=" + UserSelectSeasson.value +
+            "&Type=" + UserSelectItemType.value +
+            "&Map=" + UserSelectMaxMap.value;
+          ServerDataRequest(TTTURL).then((res) => {item.values = res;});
+        }
+    }
+    
     function ItemPageSelect(){
-      ServerDataRequest("/item/select?id=" + NowPages.value).then((res) => {item.values = res;});
+        ServerDataRequest("/item/select?id=" + NowPages.value).then((res) => {item.values = res;});
     }
-
+    
     function handleCurrentChange(val:number) {
-      NowPages.value = val;
+        NowPages.value = val;
     }
 
 </script>

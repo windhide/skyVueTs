@@ -27,67 +27,59 @@
 	</div>
 </template>
 
-<script>
-import {ChatDotRound} from "@element-plus/icons-vue"
-import { shallowRef } from 'vue'
-export default {
-    data() {
-        return {
-            talkMesseage:[],
-            Messeage:'',
-            online:false,
-            ChatDotRound:shallowRef(ChatDotRound), //这里是因为需要一个shallowRef
-        }
-    },
-    methods:{
-        getFinalID(){
-            return localStorage.getItem('loginID')
-        },
-        getCurrentTime() {
-           //获取当前时间
-        		let myDate = new Date()  
-        		let yy = String(myDate.getFullYear())  
-        		let mm = myDate.getMonth() + 1  
-        		let dd = String(myDate.getDate())  
-        		let hou = String(myDate.getHours() < 10 ? '0' + myDate.getHours() : myDate.getHours())  
-        		let min = String(myDate.getMinutes() < 10 ? '0' + myDate.getMinutes() : myDate.getMinutes())  
-        		let sec = String(myDate.getSeconds() < 10 ? '0' + myDate.getSeconds() : myDate.getSeconds())  
-        		this.nowDate = yy + '年' + mm + '月' + dd +'日' 
-        		this.nowTime = hou + ':' + min + ':' + sec  
-                let nowdata=this.nowDate+" "+this.nowTime
-                return nowdata
-        },
-        async sendMesseage(){
-            if(this.Messeage == ''){
-                this.notify_messeage("请先输入消息","error")
-                return false
-            }
-            if(localStorage.getItem('loginID') == ''){
-                this.notify_messeage("请先登录！！","error")
-                return false
-            }
-            let url ="/talkMesseage/insert?talkMesseageContent="+this.Messeage + "&"
-            + "talkMesseageAccountID=" + localStorage.getItem('loginID') + "&"
-            + "talkMesseageTime=" + this.getCurrentTime()
-            await this.ServerDataRequest(url).then(async (res) =>{
-                if(res){
-                    await this.notify_messeage("发送消息成功","success")
-                    this.Messeage = ""
-                    await this.ServerDataRequest("/talkMesseage/select").then(res =>{this.talkMesseage = res})
-                }else{
-                    await this.notify_messeage("发送消息失败","error")
-                }
-            })
-        }
-    },
-    created(){
-        this.ServerDataRequest("/talkMesseage/select").then(res =>{this.talkMesseage = res})
-        setInterval(() => {
-            this.ServerDataRequest("/talkMesseage/select").then(res =>{this.talkMesseage = res})
-        }, 20000);
+<script setup lang="ts">
+    import {ChatDotRound} from "@element-plus/icons-vue"
+    import { ref,reactive } from 'vue'
+    import { ServerDataRequest,notify_messeage } from '@/apis/defineFunction'
+
+    let talkMesseage:any = reactive([])
+    let Messeage = ref('')
+    let online = ref(false)
+
+    ServerDataRequest("/talkMesseage/select").then(res =>{talkMesseage.splice(0,99999999);talkMesseage.push(...res)})
+    setInterval(() => {
+    ServerDataRequest("/talkMesseage/select").then(res =>{talkMesseage.splice(0,99999999);talkMesseage.push(...res)})
+    }, 20000);
+
+    function getFinalID(){
+        return localStorage.getItem('loginID')
     }
-   
-}
+    function getCurrentTime() {
+        //获取当前时间
+        let myDate = new Date()  
+        let yy = String(myDate.getFullYear())  
+        let mm = myDate.getMonth() + 1  
+        let dd = String(myDate.getDate())  
+        let hou = String(myDate.getHours() < 10 ? '0' + myDate.getHours() : myDate.getHours())  
+        let min = String(myDate.getMinutes() < 10 ? '0' + myDate.getMinutes() : myDate.getMinutes())  
+        let sec = String(myDate.getSeconds() < 10 ? '0' + myDate.getSeconds() : myDate.getSeconds())  
+        let nowdata = yy + '年' + mm + '月' + dd +'日' + " " + hou + ':' + min + ':' + sec  
+        return nowdata
+    }
+    async function sendMesseage(){
+        if(Messeage.value == ''){
+            notify_messeage("请先输入消息","error")
+            return false
+        }
+
+        if(localStorage.getItem('loginID') == ''){
+            notify_messeage("请先登录！！","error")
+            return false
+        }
+
+        let url ="/talkMesseage/insert?talkMesseageContent="+Messeage.value + "&"
+            + "talkMesseageAccountID=" + localStorage.getItem('loginID') + "&"
+            + "talkMesseageTime=" + getCurrentTime()
+        await ServerDataRequest(url).then(async (res) =>{
+            if(res){
+                await notify_messeage("发送消息成功","success")
+                Messeage.value = ""
+                await ServerDataRequest("/talkMesseage/select").then(res =>{talkMesseage.splice(0,99999999);talkMesseage.push(...res)})
+            }else{
+                await notify_messeage("发送消息失败","error")
+            }
+        })
+    }
 </script>
 
 <style scoped>

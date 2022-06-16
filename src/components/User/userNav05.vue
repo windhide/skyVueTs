@@ -24,8 +24,7 @@
           </el-card>
     </div>
     <div style="width:50%;">
-    <!-- :default-sort = "{prop: 'reprintID', order: 'descending'}" -->
-        <el-table :data="Reprint" @row-click="cellmouseenter" :row-style="{height: '1px'}"  height="650" border stripe v-if="Count_Sprit_Select == '全部' || Count_Sprit_Select == '选择复刻次数'" >
+        <el-table :default-sort = "{prop: 'reprintID', order: 'descending'}" :data="Reprint" @row-click="cellmouseenter" :row-style="{height: '1px'}"  height="650" border stripe v-if="Count_Sprit_Select == '全部' || Count_Sprit_Select == '选择复刻次数'" >
             <el-table-column align="center" prop="reprintID" label="顺序" width="75"  sortable  />
             <el-table-column align="center" prop="sprit.spritName" label="先祖" width="100" />
             <el-table-column align="center" prop="sprit.seasonOrActivity.srName" label="季节" width="90"   />
@@ -44,7 +43,6 @@
 </template>
 
 <script setup lang="ts">
-
     import { ServerDataRequest,colorFuntion,$staticData } from '@/apis/defineFunction'
     import {reactive, ref, watch} from 'vue'
     
@@ -54,47 +52,47 @@
     let Reprint:any = reactive([])
     let CountReprint:any = reactive([])
     let ReprintTimer:String[] = reactive([])
-
+    
     ServerDataRequest("/reprint/select").then((res) => {Reprint.push(...res) }) // !
     
     watch(Count_Sprit_Select,_=>{
-      UserSelect()
+        UserSelect()
     })
-
+    
     function cellmouseenter(row:any, column:any, cell:any, event:any) {
-      SelectReprint.value = row;
-      ReprintTimer.splice(0,99999)
-      for (let i = 0; i < Reprint.length; i++) {
-        if (Reprint[i].spritID == SelectReprint.value.spritID) {
-            ReprintTimer.push(Reprint[i].reprintTime);
-        }
-      }
-    }
-
-    function difference() {
-      let beginTime = ReprintTimer[ReprintTimer.length-1]
-      beginTime = beginTime.replace("年","-")
-      beginTime = beginTime.replace("月","-")
-      beginTime = beginTime.replace("日","-")
-      const yy = new Date().getFullYear()
-      const mm = new Date().getMonth() + 1
-      const dd = new Date().getDate()
-      var dateBegin = new Date(beginTime.replace(/-/g,'/'));
-      var dateEnd = new Date(yy + '-' + mm + '-' + dd);
-      var dateDiff = dateEnd.getTime() - dateBegin.getTime(); //时间差的毫秒数
-      var dayDiff = Math.floor(dateDiff / (24 * 3600 * 1000)); //计算出相差天数
-      return dayDiff;
-    }
-
-    function UserSelect() {
-      CountReprint.splice(0,999)
-      if (Count_Sprit_Select.value != "选择复刻次数") {
+        SelectReprint.value = row;
+        ReprintTimer.splice(0,99999)
         for (let i = 0; i < Reprint.length; i++) {
-          if (Reprint[i].count == Count_Sprit_Select.value) {
-            CountReprint.push(Reprint[i]);
+          if (Reprint[i].spritID == SelectReprint.value.spritID) {
+              ReprintTimer.push(Reprint[i].reprintTime);
           }
         }
-      }
+    }
+    
+    function difference() {
+        let beginTime = ReprintTimer[ReprintTimer.length-1]
+        beginTime = beginTime.replace("年","-")
+        beginTime = beginTime.replace("月","-")
+        beginTime = beginTime.replace("日","-")
+        const yy = new Date().getFullYear()
+        const mm = new Date().getMonth() + 1
+        const dd = new Date().getDate()
+        var dateBegin = new Date(beginTime.replace(/-/g,'/'));
+        var dateEnd = new Date(yy + '-' + mm + '-' + dd);
+        var dateDiff = dateEnd.getTime() - dateBegin.getTime(); //时间差的毫秒数
+        var dayDiff = Math.floor(dateDiff / (24 * 3600 * 1000)); //计算出相差天数
+        return dayDiff;
+    }
+    
+    function UserSelect() {
+        CountReprint.splice(0,999)
+        if (Count_Sprit_Select.value != "选择复刻次数") {
+          for (let i = 0; i < Reprint.length; i++) {
+            if (Reprint[i].count == Count_Sprit_Select.value) {
+              CountReprint.push(Reprint[i]);
+            }
+          }
+        }
     }
 </script>
 
