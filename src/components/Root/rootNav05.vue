@@ -97,147 +97,132 @@
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      SelectReprint: null,
-      dialogVisible:false,
-      dialog:false,
-      visible: false,   // 添加的弹出框开关
-      drawerTitle:'', // 模态框内标题 用于重用
-      formLabelWidth: '70px',
-      Count_Sprit_Select: "全部",
-      Count_Sprit: ["选择复刻次数", 1, 2, 3, "全部"],
-      Reprint:[],
-      Sprit:[],
-      CountReprint:[],
-      SelectEditReprint:{
-        reprintID:'',
-        spritID:'',
-        reprintTime:'',
-      },
-      form:{
-        spritID:'',
-        ReprintTime:'',
-      },
-    };
-  },
-  methods: {
-    async handleEdit(index, row) {
-            await (this.SelectEditReprint = JSON.parse(JSON.stringify(row))) // 转换成json再转回来就不会共用同一个地址
-            await (this.dialogVisible = true)
-    },
-    UpdatehandleClose(){
-      this.$confirm('确认关闭？').then(async (_) => {  
-                await (this.dialogVisible = false)
-          }).catch(_ => {});
-    },
-    UpdateSubmit(){ // 修改
+<script setup lang="ts">
+    import {Plus} from '@element-plus/icons-vue'
+    import { ServerDataRequest,notify_messeage } from '@/apis/defineFunction'
+    import {reactive, ref, watch} from 'vue'
+    import {ElMessageBox} from 'element-plus'
+
+    let dialogVisible = ref(false)
+    let dialog = ref(false)
+    let drawerTitle = ref('') // 模态框内标题 用于重用
+    let formLabelWidth = ref('70px')
+    let Count_Sprit_Select = ref("全部")
+    let Count_Sprit:any  = ref(["选择复刻次数", 1, 2, 3, "全部"])
+    let Reprint:any = reactive([])
+    let Sprit:any = reactive([])
+    let CountReprint:any = reactive([])
+    let SelectEditReprint:any = ref({
+           reprintID:'',
+           spritID:'',
+           reprintTime:'',
+    })
+    let form:any = ref({
+       spritID:'',
+       ReprintTime:''
+    })
+
+    ServerDataRequest("/reprint/select").then(res => {Reprint.length = 0; Reprint.push(...res)})
+    ServerDataRequest("/sprit/sreach?sereachData=全部&SeasonName=全部&MaxmapName=全部").then((res)=>{Sprit.length = 0; Sprit.push(...res)})
+
+    watch(Count_Sprit_Select,UserSelect)
+
+    async function handleEdit(index:any, row:any) {
+        await (SelectEditReprint.value = JSON.parse(JSON.stringify(row))) // 转换成json再转回来就不会共用同一个地址
+        await (dialogVisible.value = true)
+    }
+    function UpdatehandleClose(){
+        ElMessageBox.confirm('确认关闭？').then(async (_) => {  
+            await (dialogVisible.value = false)
+        }).catch(_ => {});
+    }
+    function UpdateSubmit(){ // 修改
         let url = "/reprint/update?";
-           url = url + "reprintID=" + this.SelectEditReprint.reprintID +"&" +
-                       "spritID=" + this.SelectEditReprint.spritID +"&" +
-                       "reprintTime=" + this.SelectEditReprint.reprintTime
-           this.ServerDataRequest(url).then(async (res) =>{
-               if(res){
-                   await this.notify_messeage("修改成功","success")
-                   await this.ServerDataRequest("/reprint/select").then((res) => {this.Reprint = res;});
-                   await (this.dialogVisible = false)
-               }else{
-                   this.notify_messeage("修改失败","error")
-               }
-           })
-    },
-    handleDelete(index, row){
-            let id = row.reprintID;
-            console.log(id)
-            this.$confirm('此操作将删除>>'+row.sprit.spritName+'的复刻数据, 是否继续?', '提示', {
-                 confirmButtonText: '确定',
-                 cancelButtonText: '取消',
-                 type: 'warning',
-            }).then(async () => {
-                await this.ServerDataRequest("/reprint/delete?id="+id).then(res =>{
-                  if(res){
-                      this.notify_messeage("删除成功","success")
-                      this.ServerDataRequest("/reprint/select").then((res) => {this.Reprint = res;});
-                  }
-                  else    
-                    this.notify_messeage("删除失败","error")
-                })
-            }).catch(() => {
-                this.notify_messeage("取消删除","warning")
-            });
-    },
-    openDrawer(title){ // 增加的显示组件
-            this.dialog = true;
-            this.drawerTitle = title;
-    },
-    cancelForm() { // 增加的取消显示
-            this.dialog = false;
-            this.form.spritID = ''
-            this.form.reprintTime=''
-    },
-    handleClose() { // 增加的方法
-             this.$confirm('确定添加吗？') .then(async (_) => {
-                this.loading = true;
-                if(this.form.reprintTime != '' && this.form.spritID != ''){
-                    let url = "/reprint/insert?spritID=" + this.form.spritID +"&reprintTime="+this.form.reprintTime
-                    this.ServerDataRequest(url).then(async (res) =>{
+            url = url + "reprintID=" + SelectEditReprint.value.reprintID +"&" +
+              "spritID=" + SelectEditReprint.value.spritID +"&" +
+              "reprintTime=" + SelectEditReprint.value.reprintTime
+        ServerDataRequest(url).then(async (res) =>{
+            if(res){
+                await notify_messeage("修改成功","success")
+                await ServerDataRequest("/reprint/select").then((res) => {Reprint.length = 0;Reprint.push(...res)});
+                await UserSelect()
+                await (dialogVisible.value = false)
+            }else{
+               notify_messeage("修改失败","error")
+            }
+        })
+    }
+    function handleDelete(index:any, row:any){
+        let id = row.reprintID;
+        console.log(id)
+        ElMessageBox.confirm('此操作将删除>>'+row.sprit.spritName+'的复刻数据, 是否继续?', '提示', {
+             confirmButtonText: '确定',
+             cancelButtonText: '取消',
+             type: 'warning',
+        }).then(async () => {
+            await ServerDataRequest("/reprint/delete?id="+id).then(async (res) =>{
+                if(res){
+                    await notify_messeage("删除成功","success")
+                    await ServerDataRequest("/reprint/select").then((res) => {Reprint.length = 0; Reprint.push(...res)});
+                    await UserSelect()
+                }
+                else    
+                    notify_messeage("删除失败","error")
+            })
+        }).catch(() => {
+            notify_messeage("取消删除","warning")
+        });
+    }
+    function openDrawer(title:any){ // 增加的显示组件
+            dialog.value = true;
+            drawerTitle = title;
+    }
+    function cancelForm() { // 增加的取消显示
+            dialog.value = false;
+            form.value.spritID = ''
+            form.value.reprintTime=''
+    }
+    function handleClose() { // 增加的方法
+             ElMessageBox.confirm('确定添加吗？') .then(async (_) => {
+                // this.loading = true;
+                if(form.value.reprintTime != '' && form.value.spritID != ''){
+                    let url = "/reprint/insert?spritID=" + form.value.spritID +"&reprintTime="+form.value.reprintTime
+                    ServerDataRequest(url).then(async (res) =>{
                       if(res){
-                          await this.notify_messeage("成功添加","success")
-                          await this.ServerDataRequest("/reprint/select").then(res =>{this.Reprint = res})
-                          await (this.form.spritID = '')
-                          await (this.reprintTime = '')
+                          await notify_messeage("成功添加","success")
+                          await ServerDataRequest("/reprint/select").then(res =>{Reprint.length = 0; Reprint.push(...res)})
+                          await UserSelect()
+                          await (form.value.spritID = '')
+                          await (form.value.reprintTime = '')
                       }else{
-                        await this.notify_messeage("添加失败","error")
-                          this.form.spritID = ''
-                          this.form.reprintTime=''
+                        await notify_messeage("添加失败","error")
+                          form.value.spritID = ''
+                          form.value.reprintTime=''
                       }
                     })
                     setTimeout(() => {
-                          this.dialog = false;
-                    }, 1000);
+                          dialog.value = false;
+                    }, 500);
                 }else{
-                    this.notify_messeage("你的数据填写不完全，请检查！",'error')
+                    notify_messeage("你的数据填写不完全，请检查！",'error')
                 }
             }).catch(_ => {
-                this.notify_messeage("用户取消",'warning')
-                this.form.spritID = ''
-                this.reprintTime = ''
-                this.dialog = false;
+                notify_messeage("用户取消",'warning')
+                form.value.spritID = ''
+                form.value.reprintTime = ''
+                dialog.value = false;
             });
-    },
-    UserSelect() {
-      this.CountReprint = [];
-      if (this.Count_Sprit_Select != "选择复刻次数") {
-        for (let i = 0; i < this.Reprint.length; i++) {
-          if (this.Reprint[i].count == this.Count_Sprit_Select) {
-            this.CountReprint.push(this.Reprint[i]);
+    }
+    function UserSelect() {
+        CountReprint.length = 0
+        if (Count_Sprit_Select.value != "选择复刻次数") {
+          for (let i = 0; i < Reprint.length; i++) {
+            if (Reprint[i].count == Count_Sprit_Select.value) {
+              CountReprint.push(Reprint[i]);
+            }
           }
         }
-
-        for (let i = 0; i < this.CountReprint.length; i++) {
-          for (let j = i + 1; j < this.CountReprint.length; j++) {
-            try {
-              if (this.CountReprint[i].spritID == this.CountReprint[j].spritID) {
-                delete this.CountReprint[j];
-                continue;
-              }
-            } catch (error) {}
-          }
-        }
-      }
-    },
-  },
-  created() {
-        this.ServerDataRequest("/reprint/select").then(res => {this.Reprint = res})
-        this.ServerDataRequest("/sprit/sreach?sereachData=全部&SeasonName=全部&MaxmapName=全部").then((res)=>{this.Sprit = res})
-
-  },
-  watch: {  
-      Count_Sprit_Select:'UserSelect',
-  },
-};
+    }
 </script>
 
 <style scoped>

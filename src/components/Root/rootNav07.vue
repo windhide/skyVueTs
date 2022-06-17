@@ -18,79 +18,77 @@
       </div>
 
     <el-dialog v-model="dialogTableVisible" :append-to-body="true">
-        {{this.SelectReport.reportListTitle}}
+        {{SelectReport.reportListTitle}}
 	  <el-divider />
 		<el-tabs tab-position="left" class="demo-tabs">
-    		<el-tab-pane label="内容" selected >{{this.SelectReport.reportListMesseage}}</el-tab-pane>
+    		<el-tab-pane label="内容" selected >{{SelectReport.reportListMesseage}}</el-tab-pane>
     		<el-tab-pane label="图片" class="demo-image__lazy" style="width:70%"><el-image v-for="url in SelectedImg" :key="url" :src="'/api/image/'+url"  /></el-tab-pane>
-			<el-tab-pane disabled :label="'发布用户 > '+this.SelectReport.accountUsername" />
-    		<el-tab-pane disabled :label="'时间 > '+this.SelectReport.reportTime" />
+			<el-tab-pane disabled :label="'发布用户 > '+SelectReport.accountUsername" />
+    		<el-tab-pane disabled :label="'时间 > '+SelectReport.reportTime" />
   		</el-tabs>
     </el-dialog>
 
 </template>
 
-<script>
-export default {
-    data() {
-        return {
-            Report:[],
-            SelectReport:{},
-            SelectedImg:[],
-            dialogTableVisible:false,
-            activeName:"first",
-        }
-    },
-    methods:{
-        See(){
-            this.dialogTableVisible = false
-        },
-        handleSee(index, row){
-            this.SelectReport = row
-            this.SelectedImg = []
-	        let AllImage = row.reportListimage+','
-		    while(AllImage.indexOf(",") != -1){
-		    	let lstar = AllImage.indexOf(",")
-		    	AllImage = AllImage.replace(',',')')
-		    	let lend = AllImage.indexOf(",")
-		    	if(lstar != -1 && lend != -1)
-		    		this.SelectedImg.push(AllImage.substring(lstar+1,lend))
-		    }
-            this.dialogTableVisible = true
-        },
-        handleDelete(index, row){
+<script setup lang="ts">
+    import { ServerDataRequest,notify_messeage } from '@/apis/defineFunction'
+    import {reactive, ref, watch} from 'vue'
+    import {ElMessageBox} from 'element-plus'
+
+    let Report:any = reactive([])
+    let SelectReport:any = ref({})
+    let SelectedImg:any = reactive([])
+    let dialogTableVisible = ref(false)
+    let activeName = ref("first")
+
+    ServerDataRequest("/report/select").then((res) => { Report.length = 0 ; Report.push(...res)})
+
+    function See(){
+        dialogTableVisible.value = false
+    }
+
+    function handleSee(index:any, row:any){
+        SelectReport.value = row
+        SelectedImg.length = 0
+	    let AllImage = row.reportListimage+','
+		while(AllImage.indexOf(",") != -1){
+			let lstar = AllImage.indexOf(",")
+			AllImage = AllImage.replace(',',')')
+			let lend = AllImage.indexOf(",")
+			if(lstar != -1 && lend != -1)
+			    SelectedImg.push(AllImage.substring(lstar+1,lend))
+		}
+        dialogTableVisible.value = true
+    }
+
+    function handleDelete(index:any, row:any){
             let id = row.reportListID;
-        this.$confirm('此操作将删除>>'+row.reportListTitle+'此条数据, 是否继续?', '提示', {
+        ElMessageBox.confirm('此操作将删除>>'+row.reportListTitle+'此条数据, 是否继续?', '提示', {
              confirmButtonText: '确定',
              cancelButtonText: '取消',
              type: 'warning',
         }).then(async () => {
-            await this.ServerDataRequest("/report/delete?id="+id).then(async (res) =>{
+            await ServerDataRequest("/report/delete?id="+id).then(async (res) =>{
 				if(res){
-					await this.notify_messeage("删除成功","success")
+					await notify_messeage("删除成功","success")
 						let AllImage = row.reportListimage+','
 						while(AllImage.indexOf(",") != -1){
 							let lstar = AllImage.indexOf(",")
 							AllImage = AllImage.replace(',',')')
 							let lend = AllImage.indexOf(",")
 							if(lstar != -1 && lend != -1)
-								await this.ServerDataRequest("/uploadDelete?Filename="+AllImage.substring(lstar+1,lend))
+								await ServerDataRequest("/uploadDelete?Filename="+AllImage.substring(lstar+1,lend))
 						}
-					await this.ServerDataRequest("/report/select").then((res) => { this.Report = res})
+					await ServerDataRequest("/report/select").then((res) => { Report.length = 0 ; Report.push(...res)})
 				}else{
-					this.notify_messeage("删除失败","warning")		
+					notify_messeage("删除失败","warning")		
 				}
 			})
         }).catch(() => {
-            this.notify_messeage("取消删除","warning")
-			this.ServerDataRequest("/report/select").then((res) => { this.spritreport = res})
+            notify_messeage("取消删除","warning")
         });
-        },
-    },
-    created() {
-        this.ServerDataRequest("/report/select").then((res) => { this.Report = res})
-    },
-}
+    }
+    
 </script>
 
 <style>

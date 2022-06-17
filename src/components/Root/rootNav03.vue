@@ -55,9 +55,9 @@
                     </el-form-item>
                     <el-form-item label="先祖图" :label-width="formLabelWidth">
                         <el-upload accept="image/*" ref="spritLink" action="/api/upload"  list-type="picture-card"   :on-preview="handlePictureCardPreview"
-                         :on-remove="handleRemove"  :limit="2" :on-success="spritLinkSuccess">
+                        :on-remove="handleRemove"  :limit="2" :on-success="spritLinkSuccess">
                             <el-icon  class="avatar-uploader-icon"><Plus /></el-icon>
-                         </el-upload>
+                        </el-upload>
                     </el-form-item>
                     <el-form-item label="兑换图" :label-width="formLabelWidth">
                         <el-upload accept="image/*" ref="spritCost" action="/api/upload"  list-type="picture-card"  :on-preview="handlePictureCardPreview"
@@ -91,7 +91,7 @@
                     <el-form-item label="所属地图" :label-width="formLabelWidth">
                          <el-select v-model="SelectedSprit.miniMap.maxMapID" placeholder="大地图">
                             <div v-for="(item,i) in maxMap" :key="'maxmap_'+i" >
-                                   <el-option  :label="item.maxName"  :value="item.maxMapID" v-if="item.maxName!='全部'"/>
+                                <el-option  :label="item.maxName"  :value="item.maxMapID" v-if="item.maxName!='全部'"/>
                             </div>
                          </el-select>
                     </el-form-item>
@@ -111,7 +111,7 @@
                     <el-form-item label="兑换图" :label-width="formLabelWidth">
                         <el-upload accept="image/*" ref="UpdatespritCost" action="/api/upload"  list-type="picture-card"  :on-preview="handlePictureCardPreview"
                          :on-remove="handleRemove" :limit="2" :on-success="spritCostSuccessUpdate">
-                             <el-icon  class="avatar-uploader-icon"><Plus /></el-icon>
+                            <el-icon  class="avatar-uploader-icon"><Plus /></el-icon>
                          </el-upload>
                     </el-form-item>
                     
@@ -138,11 +138,16 @@
     import {reactive, ref, watch} from 'vue'
     import {ElMessageBox,UploadInstance,UploadProps,UploadUserFile} from 'element-plus'
 
-    let adddialogVisible = ref(false)  //增加的图片放大开关
-    let dialogVisible = ref(false) //修改的开关
-    let dialogindialogVisible = ref(false)
+    let UpdatespritLink = ref<UploadInstance>() // 对应上传的ref
+    let UpdatespritCost = ref<UploadInstance>()// 对应上传的ref
+    let spritLink = ref<UploadInstance>()// 对应上传的ref
+    let spritCost = ref<UploadInstance>()// 对应上传的ref
+    const fileList = ref<UploadUserFile[]>([])
+
+    let adddialogVisible = ref(false)  // 增加的图片放大开关
+    let dialogVisible = ref(false) // 修改的开关
     let drawer = ref(false)
-    let UserSelectSeason = ref('常规') //  用于默认选择筛选条件值
+    let UserSelectSeason = ref('常规') // 用于默认选择筛选条件值
     let SelectedSpritLink = ref('')
     let SelectedSpritCost = ref('')
     let dialogImageUrl = ref('') // 图片上传预览
@@ -163,12 +168,12 @@
     })
 
     ServerDataRequest('/SeasonOrActivity/daohang').then((res)=>{SeasonOrActivity.push(...res)})
-    ServerDataRequest('/sprit/sreach?sereachData=全部&SeasonName=常规&MaxmapName=全部').then((res)=>{Sprit.length = 0; Sprit.push(...res)})
+    ServerDataRequest("/sprit/sreach?sereachData=全部&SeasonName="+UserSelectSeason.value+"&MaxmapName=全部").then((res)=>{Sprit.length = 0; Sprit.push(...res)})
     ServerDataRequest('/MiniMap/select').then((res)=>{miniMap.push(...res)})
     ServerDataRequest('/MaxMap/select').then((res)=>{maxMap.push(...res)})
 
     watch(UserSelectSeason,_=>{
-        ServerDataRequest('/sprit/sreach?sereachData=全部&SeasonName='+UserSelectSeason.value+'&MaxmapName=全部').then((res)=>{Sprit.length = 0; Sprit.push(...res)})
+        ServerDataRequest("/sprit/sreach?sereachData=全部&SeasonName="+UserSelectSeason.value+"&MaxmapName=全部").then((res)=>{Sprit.length = 0; Sprit.push(...res)})
     })
     watch(form.value.maxMapID,_=>{
         form.value.miniMapID = ''
@@ -189,15 +194,15 @@
             let id = row.spritID;
             console.log(id)
             ElMessageBox.confirm('此操作将永久删除该先祖数据, 是否继续?', '提示', {
-                 confirmButtonText: '确定',
-                 cancelButtonText: '取消',
-                 type: 'warning',
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning',
             }).then(() => {
                  ServerDataRequest("/sprit/delete?id="+row.spritID).then((res) =>{
-                     if(res){
-                         notify_messeage("删除成功",'success')
-                         ServerDataRequest("/sprit/sreach?sereachData=全部&SeasonName=全部&MaxmapName=全部").then((res)=>{Sprit.length = 0; Sprit.push(...res)})
-                     }else{
+                    if(res){
+                       notify_messeage("删除成功",'success')
+                       ServerDataRequest("/sprit/sreach?sereachData=全部&SeasonName=全部&MaxmapName=全部").then((res)=>{Sprit.length = 0; Sprit.push(...res)})
+                    }else{
                          notify_messeage("删除失败，请先删除该先祖旗下的物品道具",'error')
                          let item:any = []
                          let message = ''
@@ -227,13 +232,13 @@
                                         console.log("---删除了物品后执行的重新删除---")
                                         await ServerDataRequest("/sprit/delete?id="+row.spritID)
                                         notify_messeage("删除成功 -> " + row.spritName, 'success')
-                                        await ServerDataRequest("/sprit/sreach?sereachData=全部&SeasonName=全部&MaxmapName=全部").then((res)=>{Sprit.length = 0; Sprit.push(...res)})
+                                        await ServerDataRequest("/sprit/sreach?sereachData=全部&SeasonName="+UserSelectSeason.value+"&MaxmapName=全部").then((res)=>{Sprit.length = 0; Sprit.push(...res)})
                                     }
                                  }).catch(() => {
                                    notify_messeage("取消删除",'info')
                                  });
-                             })
-                     }
+                            })
+                    }
                  })
             }).catch(() => {
                 notify_messeage("取消操作","warning")
@@ -252,7 +257,7 @@
                     ServerDataRequest(url).then(async (res) =>{
                         if(res!=false)
                             await notify_messeage("添加成功!",'success')
-                            await ServerDataRequest("/sprit/sreach?sereachData=全部&SeasonName=全部&MaxmapName=全部").then((res)=>{Sprit.length = 0; Sprit.push(...res)})
+                            await ServerDataRequest("/sprit/sreach?sereachData=全部&SeasonName="+UserSelectSeason.value+"&MaxmapName=全部").then((res)=>{Sprit.length = 0; Sprit.push(...res)})
                     }).catch(async (res) =>{
                             await resetForm();
                             await notify_messeage("由于服务器问题上传失败!",'error')
@@ -262,8 +267,8 @@
                     form.value.maxMapID=''
                     form.value.spritName=''
                     form.value.spritLink=''
-                    // $refs['spritLink'].clearFiles();
-                    // $refs['spritCost'].clearFiles();
+                    spritLink.value!.clearFiles();
+                    spritCost.value!.clearFiles();
                     setTimeout(() => {
                             drawer.value = false
                        }, 1000);
@@ -278,14 +283,14 @@
     }
     function UpdatehandleClose() {
         ElMessageBox.confirm('确认关闭？')
-          .then(async (_) => {  
-            await ServerDataRequest("/uploadDelete?Filename="+SelectedSprit.value.spritCost)
-            await ServerDataRequest("/uploadDelete?Filename="+SelectedSprit.value.spritLink)
-            // await $refs['UpdatespritLink'].clearFiles();
-            // await $refs['UpdatespritCost'].clearFiles();
-            await (dialogVisible.value = false)
-          })
-          .catch(_ => {});
+            .then(async (_) => {  
+              await ServerDataRequest("/uploadDelete?Filename="+SelectedSprit.value.spritCost)
+              await ServerDataRequest("/uploadDelete?Filename="+SelectedSprit.value.spritLink)
+              await UpdatespritLink.value!.clearFiles();
+              await UpdatespritCost.value!.clearFiles();
+              await (dialogVisible.value = false)
+            })
+            .catch(_ => {});
     }
     function cancelForm() {
         // dialog.value = false;
@@ -301,8 +306,8 @@
             ServerDataRequest("/uploadDelete?Filename="+form.value.spritCost);
         form.value.spritName=''
         form.value.spritLink=''
-        // $refs['spritLink'].clearFiles();
-        // $refs['spritCost'].clearFiles();
+        spritLink.value!.clearFiles();
+        spritCost.value!.clearFiles();
     }
     function statsForm(){
         return form.value.spritName!= '' && form.spritLink !='' 
@@ -310,15 +315,15 @@
             && form.value.miniMapID != '' && form.value.maxMapID != ''
     }
     function handleRemove(file:any) {
-        // this.ServerDataRequest("/uploadDelete?Filename="+file.response);
-        // if(this.form.spritLink == file.response)
-        //     this.form.spritLink = ''
-        // if(this.form.spritCost == file.response)
-        // this.form.spritCost = ''
+        ServerDataRequest("/uploadDelete?Filename="+file.response);
+        if(form.value.spritLink == file.response)
+            form.value.spritLink = ''
+        if(form.value.spritCost == file.response)
+        form.value.spritCost = ''
     }
     function handlePictureCardPreview(file:any) {
-        // this.dialogImageUrl = file.url;
-        // this.adddialogVisible = true;
+        dialogImageUrl = file.url;
+        adddialogVisible.value = true;
     }
     function spritLinkSuccess(response:any, file:any, fileList:any){
         if(fileList.length>1){
@@ -339,29 +344,29 @@
             ServerDataRequest("/uploadDelete?Filename="+fileList[0].response);
             fileList.splice(0,1);
         }
-        SelectedSprit.values.spritLink = response
+        SelectedSprit.value.spritLink = response
     }
     function spritCostSuccessUpdate(response:any, file:any, fileList:any){
         if(fileList.length>1){
             ServerDataRequest("/uploadDelete?Filename="+fileList[0].response);
             fileList.splice(0,1);
         }
-        SelectedSprit.values.spritCost =  response
+        SelectedSprit.value.spritCost =  response
     }
     function UpdateSubmit(){
         let url = "/sprit/update?";
-        url = url + "spritID=" + SelectedSprit.values.spritID +"&" +
-                    "spritName=" + SelectedSprit.values.spritName +"&" +
-                    "spritCost=" + SelectedSprit.values.spritCost +"&" +
-                    "spritLink=" + SelectedSprit.values.spritLink +"&" +
-                    "srID=" + SelectedSprit.values.srID +"&" +
-                    "miniMapID=" + SelectedSprit.values.miniMapID 
+        url = url + "spritID=" + SelectedSprit.value.spritID +"&" +
+            "spritName=" + SelectedSprit.value.spritName +"&" +
+            "spritCost=" + SelectedSprit.value.spritCost +"&" +
+            "spritLink=" + SelectedSprit.value.spritLink +"&" +
+            "srID=" + SelectedSprit.value.srID +"&" +
+            "miniMapID=" + SelectedSprit.value.miniMapID 
         ServerDataRequest(url).then(async (res) =>{
             if(res){
                 await notify_messeage("修改成功","success")
-                await ServerDataRequest("/sprit/sreach?sereachData=全部&SeasonName=全部&MaxmapName=全部").then((res)=>{Sprit.length = 0; Sprit.push(...res) })
-                // await $refs['UpdatespritLink'].clearFiles();
-                // await $refs['UpdatespritCost'].clearFiles();
+                await ServerDataRequest("/sprit/sreach?sereachData=全部&SeasonName="+UserSelectSeason.value+"&MaxmapName=全部").then((res)=>{Sprit.length = 0; Sprit.push(...res)})
+                await UpdatespritLink.value!.clearFiles();
+                await UpdatespritCost.value!.clearFiles();
                 await (dialogVisible.value = false)
             }else{
                 notify_messeage("修改失败","error")
@@ -369,9 +374,9 @@
         })
     }
     function cancelClick() {
-         resetForm()
-         notify_messeage("取消操作","warning")
-         drawer.value = false
+        resetForm()
+        notify_messeage("取消操作","warning")
+        drawer.value = false
     }
 </script>
 
