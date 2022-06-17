@@ -32,7 +32,7 @@
 
 <script setup lang="ts">
     import { ServerDataRequest,notify_messeage } from '@/apis/defineFunction'
-    import {reactive, ref, watch} from 'vue'
+    import {reactive, ref} from 'vue'
     import {ElMessageBox} from 'element-plus'
 
     let Report:any = reactive([])

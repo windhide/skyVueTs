@@ -78,44 +78,43 @@
     <!-- 修改 -->
         <el-dialog v-model="dialogVisible" title="修改" width="35%" draggable :before-close="UpdatehandleClose"  :close-on-press-escape="true"  :append-to-body="true">
             <el-form :model="SelectedSprit" style="width:50%;margin:0 auto" :label-position="'left'">
-                     <el-form-item label="先祖名字" :label-width="formLabelWidth">
-                       <el-input v-model="SelectedSprit.spritName" autocomplete="off"></el-input>
-                     </el-form-item>
-                     <el-form-item label="季节" :label-width="formLabelWidth">
-                         <el-select v-model="SelectedSprit.srID" placeholder="请选择对应季节">
-                            <div v-for="(item,i) in SeasonOrActivity" :key="'SeasonOrActivity_'+i">
-                                <el-option  :label="item.srName"  :value="item.srID" v-if="(item.srName!='全部' && item.srName.indexOf('季') != -1) || item.srName.indexOf('常规') != -1"/>
-                            </div>
-                         </el-select>
-                    </el-form-item>
-                    <el-form-item label="所属地图" :label-width="formLabelWidth">
-                         <el-select v-model="SelectedSprit.miniMap.maxMapID" placeholder="大地图">
-                            <div v-for="(item,i) in maxMap" :key="'maxmap_'+i" >
-                                <el-option  :label="item.maxName"  :value="item.maxMapID" v-if="item.maxName!='全部'"/>
-                            </div>
-                         </el-select>
-                    </el-form-item>
-                    <el-form-item :label-width="formLabelWidth">
-                         <el-select v-model="SelectedSprit.miniMapID" placeholder="小地图（请先选择大地图）">
-                            <div  v-for="(item,i) in miniMap" :key="'minimap_'+i" >
-                                <el-option :label="item.miniName"  :value="item.miniMapID" v-if="item.maxMapID==SelectedSprit.miniMap.maxMapID"/>
-                            </div>
-                         </el-select>
-                    </el-form-item>
-                    <el-form-item label="先祖图" :label-width="formLabelWidth">
-                         <el-upload accept="image/*" ref="UpdatespritLink" action="/api/upload"  list-type="picture-card"   :on-preview="handlePictureCardPreview"
-                          :on-remove="handleRemove"  :limit="2" :on-success="spritLinkSuccessUpdate">
-                              <el-icon  class="avatar-uploader-icon"><Plus /></el-icon>
-                          </el-upload>
-                    </el-form-item>
-                    <el-form-item label="兑换图" :label-width="formLabelWidth">
-                        <el-upload accept="image/*" ref="UpdatespritCost" action="/api/upload"  list-type="picture-card"  :on-preview="handlePictureCardPreview"
-                         :on-remove="handleRemove" :limit="2" :on-success="spritCostSuccessUpdate">
-                            <el-icon  class="avatar-uploader-icon"><Plus /></el-icon>
-                         </el-upload>
-                    </el-form-item>
-                    
-                </el-form>
+                <el-form-item label="先祖名字" :label-width="formLabelWidth">
+                  <el-input v-model="SelectedSprit.spritName" autocomplete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="季节" :label-width="formLabelWidth">
+                    <el-select v-model="SelectedSprit.srID" placeholder="请选择对应季节">
+                       <div v-for="(item,i) in SeasonOrActivity" :key="'SeasonOrActivity_'+i">
+                           <el-option  :label="item.srName"  :value="item.srID" v-if="(item.srName!='全部' && item.srName.indexOf('季') != -1) || item.srName.indexOf('常规') != -1"/>
+                       </div>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="所属地图" :label-width="formLabelWidth">
+                     <el-select v-model="SelectedSprit.miniMap.maxMapID" placeholder="大地图">
+                        <div v-for="(item,i) in maxMap" :key="'maxmap_'+i" >
+                            <el-option  :label="item.maxName"  :value="item.maxMapID" v-if="item.maxName!='全部'"/>
+                        </div>
+                     </el-select>
+                </el-form-item>
+                <el-form-item :label-width="formLabelWidth">
+                     <el-select v-model="SelectedSprit.miniMapID" placeholder="小地图（请先选择大地图）">
+                        <div  v-for="(item,i) in miniMap" :key="'minimap_'+i" >
+                            <el-option :label="item.miniName"  :value="item.miniMapID" v-if="item.maxMapID==SelectedSprit.miniMap.maxMapID"/>
+                        </div>
+                     </el-select>
+                </el-form-item>
+                <el-form-item label="先祖图" :label-width="formLabelWidth">
+                     <el-upload accept="image/*" ref="UpdatespritLink" action="/api/upload"  list-type="picture-card"   :on-preview="handlePictureCardPreview"
+                      :on-remove="handleRemove"  :limit="2" :on-success="spritLinkSuccessUpdate">
+                          <el-icon  class="avatar-uploader-icon"><Plus /></el-icon>
+                      </el-upload>
+                </el-form-item>
+                <el-form-item label="兑换图" :label-width="formLabelWidth">
+                    <el-upload accept="image/*" ref="UpdatespritCost" action="/api/upload"  list-type="picture-card"  :on-preview="handlePictureCardPreview"
+                     :on-remove="handleRemove" :limit="2" :on-success="spritCostSuccessUpdate">
+                        <el-icon  class="avatar-uploader-icon"><Plus /></el-icon>
+                     </el-upload>
+                </el-form-item>        
+            </el-form>
                     目前先组图：<el-image style="width: auto; height: 200px" :src="'/api/image/'+SelectedSpritLink" />
                     目前兑换图：<el-image style="width: auto; height: 200px" :src="'/api/image/'+SelectedSpritCost" />
             <template #footer>

@@ -73,7 +73,7 @@
                     <el-button type="primary" @click="handleClose">添加</el-button>
                 </div>
               </template>
-            </el-drawer>
+        </el-drawer>
        <!-- 修改部分 -->
         <el-dialog title="修改" v-model="dialogVisible" :before-close="UpdatehandleClose" width="35%" :append-to-body="true">
             <el-form :model="SelectEditReprint" style="width:50%;margin:0 auto" :label-position="'left'">

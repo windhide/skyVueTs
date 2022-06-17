@@ -38,9 +38,9 @@
 				<div id="nav07"> 
 					<rootNav07 />
 				</div>
-				<!-- <div id="nav08"> -->
-					<!-- <Root_Nav08 /> -->
-				<!-- </div> -->
+				<div id="nav08">
+					<rootNav08 />
+				</div>
 				<!-- <div id="nav09"> -->
 					<!-- <Root_Nav09 /> -->
 				<!-- </div> -->
