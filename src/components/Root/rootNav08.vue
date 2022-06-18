@@ -12,7 +12,7 @@
     <!-- 内容主体部分 -->
     <div style="width:70%;margin:20px auto">
         <el-table :data="SeasonOrActivity.filter((data:any) => data.srName.indexOf(dataIndex)!=-1)" height="482" stripe  >
-            <el-table-column align="center" prop="srID" label="序号" />
+            <el-table-column align="center" prop="srID" label="序号" width="100" />
             <el-table-column align="center" prop="srName" label="活动或季节" />
             <el-table-column align="center" prop="srStartTime" label="开始时间" />
             <el-table-column align="center" prop="srEndTime" label="结束时间" />

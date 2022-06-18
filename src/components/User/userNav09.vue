@@ -4,7 +4,7 @@
 			<div class="nav09_bt">奇妙留言</div>
 		</div>
         <div style="width:50%; height:50%;margin:5vh auto">
-            <el-card class="box-card" style="height:50vh;margin-top:5vh">
+            <el-card class="box-card" style="height:50vh;margin-top:5vh;">
                 <div v-for="(item, index) in talkMesseage" :key="index">
                     <div v-if="item.account.accountID == getFinalID()">
                         <p style="text-align:right;color:#F56C6C">我&nbsp&nbsp&nbsp{{item.talkMesseageTime}}</p>
