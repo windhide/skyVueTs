@@ -11,7 +11,7 @@
     </div>
     <!-- 内容主体部分 -->
     <div style="width:70%;margin:20px auto">
-        <el-table :data="SeasonOrActivity.filter((data:any) => data.srName.indexOf(dataIndex)!=-1)" height="500" stripe  >
+        <el-table :data="SeasonOrActivity.filter((data:any) => data.srName.indexOf(dataIndex)!=-1)" height="482" stripe  >
             <el-table-column align="center" prop="srID" label="序号" />
             <el-table-column align="center" prop="srName" label="活动或季节" />
             <el-table-column align="center" prop="srStartTime" label="开始时间" />
@@ -27,10 +27,10 @@
     </div>
 
     <!-- 新增部分 -->
-    <el-drawer v-model="dialog" title="添加物品" :before-close="addHandleClose"  :append-to-body="true">
+    <el-drawer v-model="dialog" title="添加季节/活动" :before-close="addHandleClose"  :append-to-body="true">
         <template #default>
             <el-form :model="form" style="width:50%;margin:0 auto" :label-position="'left'">
-                <el-form-item label="季节或活动名字" :label-width="formLabelWidth">
+                <el-form-item label="季节/活动名字" :label-width="formLabelWidth">
                     <el-input v-model="form.srName"></el-input>
                 </el-form-item>
                 <el-form-item label="开始时间" :label-width="formLabelWidth">
@@ -60,6 +60,8 @@
 
     let SeasonOrActivityTopLab  = ref(['季节','活动'])
     let SeasonOrActivityTopLabSelect = ref('季节')
+    let drawerTitle = ref('') // 模态框内标题 用于重用
+    let formLabelWidth = ref('70px')
     let dataIndex = ref('季')
     let dialog = ref(false)
     let SeasonOrActivity:any = reactive([])

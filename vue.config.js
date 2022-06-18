@@ -9,7 +9,7 @@ module.exports = { 
         proxy: {
             '/api': {
                 target: 'http://localhost:8080/', // target host
-                ws: true, // proxy websockets 
+                ws: false, // proxy websockets 
                 changeOrigin: true, // needed for virtual hosted sites
                 pathRewrite: {
                     '^/api': '' // rewrite path
