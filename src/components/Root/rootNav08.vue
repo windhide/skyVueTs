@@ -18,18 +18,18 @@
             <el-table-column align="center" prop="srEndTime" label="结束时间" />
             <el-table-column align="center" label="操作" width="200">
                 <template #default="scope">
-                    <el-button size="default"  @click="handleSee(scope.$index, scope.row)" type="primary" plain>查看</el-button>
+                    <el-button size="default"  @click="handleEdit(scope.$index, scope.row)" type="warning" plain>编辑</el-button>
                     <el-button size="default"  @click="handleDelete(scope.$index, scope.row)" type="danger" plain >删除</el-button>
                 </template>  
             </el-table-column>
         </el-table>
-        <el-button size="default"  @click="openDrawer('添加活动')" type="success" style="margin-top: 10px;" plain>添加复刻</el-button>
+        <el-button size="default"  @click="openDrawer('添加活动')" type="success" style="margin-top: 10px;" plain>添加季节/活动</el-button>
     </div>
 
     <!-- 新增部分 -->
     <el-drawer v-model="dialog" title="添加季节/活动" :before-close="addHandleClose"  :append-to-body="true">
         <template #default>
-            <el-form :model="form" style="width:50%;margin:0 auto" :label-position="'left'">
+            <el-form :model="form" style="width:60%;margin:0 auto" :label-position="'left'">
                 <el-form-item label="季节/活动名字" :label-width="formLabelWidth">
                     <el-input v-model="form.srName"></el-input>
                 </el-form-item>
@@ -40,7 +40,7 @@
                     <el-date-picker v-model="form.srEndTime" format="YYYY年M月D日" value-format="YYYY年M月D日" type="date" placeholder="选择结束时间" /> 
                 </el-form-item>
                 <el-form-item label="季节/活动" :label-width="formLabelWidth">
-                    <el-switch v-model="form.isSeason" class="mb-2" active-text="季节" inactive-text="活动" />
+                    <el-switch v-model="form.srIsSeason" class="mb-2" active-text="季节" inactive-text="活动" />
                 </el-form-item>
             </el-form>
         </template>
@@ -51,6 +51,28 @@
           </div>
         </template>
     </el-drawer>
+
+    <!-- 修改部分 -->
+    <el-dialog title="修改" v-model="EditVisible" :before-close="UpdatehandleClose" width="35%" :append-to-body="true">
+        <el-form :model="form" style="width:60%;margin:0 auto" :label-position="'left'">
+                <el-form-item label="季节/活动名字" :label-width="formLabelWidth">
+                    <el-input v-model="form.srName"></el-input>
+                </el-form-item>
+                <el-form-item label="开始时间" :label-width="formLabelWidth">
+                    <el-date-picker v-model="form.srStartTime" format="YYYY年M月D日" value-format="YYYY年M月D日" type="date" placeholder="选择开始时间" /> 
+                </el-form-item>
+                <el-form-item label="结束时间" :label-width="formLabelWidth">
+                    <el-date-picker v-model="form.srEndTime" format="YYYY年M月D日" value-format="YYYY年M月D日" type="date" placeholder="选择结束时间" /> 
+                </el-form-item>
+                <el-form-item label="季节/活动" :label-width="formLabelWidth">
+                    <el-switch v-model="form.srIsSeason" class="mb-2" active-text="季节" inactive-text="活动" />
+                </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="UpdatehandleClose">取 消</el-button>
+          <el-button type="primary" @click="UpdateSubmit">确 定</el-button>
+        </span>
+    </el-dialog>
 </template>
 
 <script setup lang="ts">
@@ -61,15 +83,16 @@
     let SeasonOrActivityTopLab  = ref(['季节','活动'])
     let SeasonOrActivityTopLabSelect = ref('季节')
     let drawerTitle = ref('') // 模态框内标题 用于重用
-    let formLabelWidth = ref('70px')
+    let formLabelWidth = ref('120px')
     let dataIndex = ref('季')
     let dialog = ref(false)
+    let EditVisible = ref(false)
     let SeasonOrActivity:any = reactive([])
     let form:any = ref({
         srName:'',
         srStartTime:'',
         srEndTime:'',
-        isSeason:false,
+        srIsSeason:false,
     })
     
     ServerDataRequest("/SeasonOrActivity/select").then(res=>{SeasonOrActivity.length = 0;SeasonOrActivity.push(...res)   })
@@ -80,32 +103,119 @@
         else
             dataIndex.value = '活动'
     })
-
     function openDrawer(title:any){ // 增加的显示组件
         dialog.value = true;
         drawerTitle = title;
     }
 
     function addHandleClose(){
+        ElMessageBox.confirm('确定添加吗？', '提示', {
+             confirmButtonText: '确定',
+             cancelButtonText: '取消',
+             type: 'warning',
+        }).then(async () => {
+            if(stateForm()){
+                let url = "/SeasonOrActivity/insert?srName=" + form.value.srName 
+                    + "&srStartTime=" + form.value.srStartTime
+                    + "&srEndTime=" + form.value.srEndTime
+                    + "&srIsSeason=" + form.value.srIsSeason
+                await ServerDataRequest(url).then(async (res) =>{
+				    if(res){
+				    	notify_messeage("添加成功!","success")
+                        ServerDataRequest("/SeasonOrActivity/select").then(res=>{SeasonOrActivity.length = 0;SeasonOrActivity.push(...res)   })
+                        resetForm()
+				    }else{
+				    	notify_messeage("因服务器原因失败","warning")	
+                        resetForm()
+				    }
+			    })
+            }else{
+				notify_messeage("数据填写不全！","warning")	
+            }
+        }).catch(() => {
+            addCancelForm()
+        })
+    }
 
+    function UpdatehandleClose(){
+        resetForm()
+        notify_messeage("取消","warning")
+        EditVisible.value=false
+    }
+
+    function UpdateSubmit(){
+        ElMessageBox.confirm('确定修改吗？', '提示', {
+             confirmButtonText: '确定',
+             cancelButtonText: '取消',
+             type: 'warning',
+        }).then(async () => {
+            if(stateForm()){
+                let url = "/SeasonOrActivity/update?srID=" + form.value.srID 
+                    + "&srName=" + form.value.srName
+                    + "&srStartTime=" + form.value.srStartTime
+                    + "&srEndTime=" + form.value.srEndTime
+                    + "&srIsSeason=" + form.value.srIsSeason
+                await ServerDataRequest(url).then(async (res) =>{
+				    if(res){
+				    	notify_messeage("修改成功!","success")
+                        ServerDataRequest("/SeasonOrActivity/select").then(res=>{SeasonOrActivity.length = 0;SeasonOrActivity.push(...res)   })
+                        resetForm()
+				    }else{
+				    	notify_messeage("因服务器原因失败","warning")	
+                        resetForm()
+				    }
+			    })
+            }else{
+				notify_messeage("数据填写不全！","warning")	
+            }
+        }).catch(() => {
+            resetForm()
+            notify_messeage("取消修改","warning")
+        })
     }
 
     function addCancelForm(){
-        form.value.srName = ''
-        form.value.srStartTime = ''
-        form.value.srEndTime = ''
-        form.value.isSeason = false
-        dialog.value = false;
+        resetForm()
         notify_messeage("取消添加","warning")
     }
 
+    function resetForm(){
+        form.value.srName = ''
+        form.value.srStartTime = ''
+        form.value.srEndTime = ''
+        form.value.srIsSeason = false
+        dialog.value = false
+        EditVisible.value = false
+    }
 
-    function handleSee(index:any, row:any){
+    function stateForm(){
+        return form.value.srName != '' &&
+        form.value.srStartTime != '' &&
+        form.value.srEndTime != '' 
+    }
 
+    function handleEdit(index:any, row:any){
+        form.value = JSON.parse(JSON.stringify(row))
+        EditVisible.value=true
     }
 
     function handleDelete(index:any, row:any){
-
+        ElMessageBox.confirm('确定删除>>>'+row.srName+'吗？', '提示', {
+             confirmButtonText: '确定',
+             cancelButtonText: '取消',
+             type: 'warning',
+        }).then(async () => {
+            ServerDataRequest("/SeasonOrActivity/delete?id="+row.srID).then(res =>{
+                if(res){
+                    notify_messeage("删除成功","success")
+                    ServerDataRequest("/SeasonOrActivity/select").then(res=>{SeasonOrActivity.length = 0;SeasonOrActivity.push(...res)   })
+                }else
+                    notify_messeage("因为服务器的问题删除失败","warning")
+            })
+        }).catch(() => {
+            resetForm()
+            notify_messeage("取消删除","warning")
+        })
     }
 
 </script>

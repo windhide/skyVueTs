@@ -39,7 +39,6 @@
     let SelectReport:any = ref({})
     let SelectedImg:any = reactive([])
     let dialogTableVisible = ref(false)
-    let activeName = ref("first")
 
     ServerDataRequest("/report/select").then((res) => { Report.length = 0 ; Report.push(...res)})
 

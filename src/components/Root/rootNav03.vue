@@ -174,9 +174,7 @@
     watch(UserSelectSeason,_=>{
         ServerDataRequest("/sprit/sreach?sereachData=全部&SeasonName="+UserSelectSeason.value+"&MaxmapName=全部").then((res)=>{Sprit.length = 0; Sprit.push(...res)})
     })
-    watch(form.value.maxMapID,_=>{
-        form.value.miniMapID = ''
-    })
+   
 
     async function handleEdit(index:any, row:any) {
             await (SelectedSprit.value = JSON.parse(JSON.stringify(row))) // 转换成json再转回来就不会共用同一个地址
