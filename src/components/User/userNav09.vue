@@ -29,16 +29,20 @@
 
 <script setup lang="ts">
     import {ChatDotRound} from "@element-plus/icons-vue"
-    import { ref,reactive } from 'vue'
+    import { ref,reactive,onBeforeUnmount } from 'vue'
     import { ServerDataRequest,notify_messeage } from '@/apis/defineFunction'
 
     let talkMesseage:any = reactive([])
     let Messeage = ref('')
 
-    ServerDataRequest("/talkMesseage/select").then(res =>{talkMesseage.splice(0,99999999);talkMesseage.push(...res)})
-    setInterval(() => {
-    ServerDataRequest("/talkMesseage/select").then(res =>{talkMesseage.splice(0,99999999);talkMesseage.push(...res)})
-    }, 20000);
+    ServerDataRequest("/talkMesseage/select").then(res =>{talkMesseage.length = 0;talkMesseage.push(...res)})
+    let timer = setInterval(() => {
+        ServerDataRequest("/talkMesseage/select").then(res =>{talkMesseage.length = 0;talkMesseage.push(...res)})
+    }, 10000); // 更改到10s一次
+
+    onBeforeUnmount(()=>{
+         clearInterval(timer) // 页面销毁的时候结束轮询
+    })
 
     function getFinalID(){
         return localStorage.getItem('loginID')
@@ -73,7 +77,7 @@
             if(res){
                 await notify_messeage("发送消息成功","success")
                 Messeage.value = ""
-                await ServerDataRequest("/talkMesseage/select").then(res =>{talkMesseage.splice(0,99999999);talkMesseage.push(...res)})
+                await ServerDataRequest("/talkMesseage/select").then(res =>{talkMesseage.length = 0;talkMesseage.push(...res)})
             }else{
                 await notify_messeage("发送消息失败","error")
             }

@@ -73,7 +73,7 @@
         canlendarValue.value = new Date(startTime)
     }
 
-    function  activityTimeIshave(item:any,inDate:any){ // 将活动的时间植入到canlendar
+    function activityTimeIshave(item:any,inDate:any){ // 将活动的时间植入到canlendar
        try { // catch包住错误防止误报错
             let startTime = item.srStartTime
             let endTime = item.srEndTime
