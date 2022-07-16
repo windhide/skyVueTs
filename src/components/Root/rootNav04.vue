@@ -141,7 +141,7 @@ import {ElMessageBox,UploadInstance,UploadUserFile} from 'element-plus'
     ServerDataRequest("/sprit/sreach?sereachData=全部&SeasonName=全部&MaxmapName=全部").then((res)=>{Sprit.push(...res)})
 
     watch(UserSelectItemType,_=>{
-        ServerDataRequest("/item/sreach?sreach=全部&season=全部&Type="+UserSelectItemType+"&Map=全部").then((res) => {Item.length = 0 ; Item.push(...res)});
+        ServerDataRequest("/item/sreach?sreach=全部&season=全部&Type="+UserSelectItemType.value+"&Map=全部").then((res) => {Item.length = 0 ; Item.push(...res)});
     })
 
     async function handleEdit(index:any, row:any) {

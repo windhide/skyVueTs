@@ -2,21 +2,23 @@
   <div>
         <div style="margin:10px auto;">
             <el-input v-model="sereachData" placeholder="请输入先祖名字查询，或选择对应季节查询"  class="input-with-select" style="width:50%" size="large">
-                        <el-button slot="append" @click="searchSprit()">搜索</el-button>
+                <template #append>
+                  <el-button :icon="Search" @click="searchSprit()" />
+                </template>
            </el-input> 
            <br>
-           <el-radio-group v-model="UserSelectSeason" style="margin:10px auto 0px;" v-for="(item,i) in SeasonOrActivity.values"  :key="'ss_'+i" size="large">
+           <el-radio-group v-model="UserSelectSeason" style="margin:10px auto 0px;" v-for="(item,i) in SeasonOrActivity"  :key="'ss_'+i" size="large">
               <button><el-radio-button :label="item.srName" /></button>
            </el-radio-group>
            <br>
-           <el-radio-group v-model="UserSelectMaxMap" style="margin:10px auto 0px;" v-for="(item,i) in MaxMap.values" :key="'MM_'+i" size="large">
+           <el-radio-group v-model="UserSelectMaxMap" style="margin:10px auto 0px;" v-for="(item,i) in MaxMap" :key="'MM_'+i" size="large">
               <button><el-radio-button :label="item.maxName" /></button>
            </el-radio-group>
         </div>
 
        <div style="width:100%;">
           <el-row>
-            <el-col  v-for="(item, index) in Sprit.values" :key="'sprit_'+index" :span="4" v-if="true">
+            <el-col  v-for="(item, index) in Sprit" :key="'sprit_'+index" :span="4" v-if="true">
             <div class="demo-image__preview">
               <el-card :body-style="{ padding: '0px' }">
                 <b><span style="color:red"> {{item.spritName}} </span></b>
@@ -39,6 +41,7 @@
 
 <script setup lang="ts">
     import { ServerDataRequest,colorFuntion,$staticData } from '@/apis/defineFunction'
+    import { Search } from '@element-plus/icons-vue'
     import {reactive, ref, watch} from 'vue'
     
     let UserSelectSeason = ref('全部')
@@ -52,9 +55,9 @@
     let Sprit:any = reactive([])
     let srcList = ['https://fuss10.elemecdn.com/a/3f/3302e58f9a181d2509f3dc0fa68b0jpeg.jpeg']
     //加数据
-    ServerDataRequest('/SeasonOrActivity/daohang').then((res)=>{SeasonOrActivity.values = res})
+    ServerDataRequest('/SeasonOrActivity/daohang').then((res)=>{SeasonOrActivity.push(...res)})
     ServerDataRequest("/sprit/SpritPage").then((res)=>{Pages.value = res})
-    ServerDataRequest("/MaxMap/select").then((res)=>{MaxMap.values = res})
+    ServerDataRequest("/MaxMap/select").then((res)=>{MaxMap.push(...res)})
     selectBySpritsPage();
 
     //监听
@@ -64,7 +67,7 @@
 
     //方法体
     function selectBySpritsPage(){
-        ServerDataRequest("/sprit/select?id="+NowPages.value).then((res)=>{Sprit.values = res})
+        ServerDataRequest("/sprit/select?id="+NowPages.value).then((res)=>{Sprit.length = 0; Sprit.push(...res)})
     }
     function handleCurrentChange(val:number) {
         NowPages.value = val
@@ -80,7 +83,7 @@
            "/sprit/sreach?sereachData="  + sereachData.value  +
            '&SeasonName='  + UserSelectSeason.value +
            '&MaxmapName='  + UserSelectMaxMap.value
-           ServerDataRequest(url).then((res)=>{Sprit.values = res})
+           ServerDataRequest(url).then((res)=>{Sprit.length = 0; Sprit.push(...res)})
         }
     }
     function imageClick(url:string){
@@ -90,6 +93,7 @@
 </script>
 
 <style scoped >
+
  .demo-image__error .image-slot {
   font-size: 30px;
 }
@@ -119,9 +123,9 @@
  .el-select .el-input {
     width: 500px;
   }
-  .input-with-select .el-input-group__prepend {
-    background-color: #fff;
-  }
+ .input-with-select .el-input-group__prepend {
+   background-color: var(--el-fill-color-blank);
+ }
  .el-radio-group button{
     margin: 0;
     padding:0;

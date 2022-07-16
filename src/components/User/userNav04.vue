@@ -2,24 +2,26 @@
 <div>
        <div style="margin:10px auto;">
             <el-input v-model="sereachData" placeholder="请输入先祖名字查询，或选择对应季节查询"  class="input-with-select" style="width:50%"  size="large">
-             <el-button slot="append" @click="getdataForSreach()">搜索</el-button>
+             <template #append>
+                  <el-button :icon="Search" @click="getdataForSreach()" />
+                </template>
            </el-input>
            <br>
-           <el-radio-group v-model="UserSelectSeasson" style="margin:10px auto 0px;" v-for="(item,i) in SeasonOrActivity.values" :key="'SOA_'+i"  size="large">
+           <el-radio-group v-model="UserSelectSeasson" style="margin:10px auto 0px;" v-for="(item,i) in SeasonOrActivity" :key="'SOA_'+i"  size="large">
               <button><el-radio-button :label="item.srName" /></button>
            </el-radio-group>
            <br>
-           <el-radio-group v-model="UserSelectItemType" style="margin:10px auto 0px;" v-for="(item,i) in ItemType.values" :key="'IT_'+i"  size="large">
+           <el-radio-group v-model="UserSelectItemType" style="margin:10px auto 0px;" v-for="(item,i) in ItemType" :key="'IT_'+i"  size="large">
               <button><el-radio-button :label="item.itemTypeName" /></button>
            </el-radio-group>
            <br>
-           <el-radio-group v-model="UserSelectMaxMap" style="margin:10px auto 0px;" v-for="(item,i) in MaxMap.values" :key="'MM_'+i" size="large">
+           <el-radio-group v-model="UserSelectMaxMap" style="margin:10px auto 0px;" v-for="(item,i) in MaxMap" :key="'MM_'+i" size="large">
               <button><el-radio-button :label="item.maxName" /></button>
            </el-radio-group>
         </div>
-       <div style="width:100%;display:flex">
+       <div style="width:100%">
             <el-row>
-                <el-col  v-for="(items, index) in item.values" :key="index" :span="3" >
+                <el-col  v-for="(items, index) in item" :key="index" :span="3" >
                 <div class="demo-image__preview">
                   <el-card :body-style="{ padding: '0px' }">
                      <el-image style="width: 90px; height: 80px;padding-top: 5px" :src="$staticData+items.itemLink" :preview-src-list="srcList" fit="contain" @click="imageClick($staticData+items.sprit.spritCost,$staticData+items.sprit.spritLink)" :hide-on-click-modal="true"   :preview-teleported="true" />
@@ -42,6 +44,7 @@
 
 <script setup lang="ts">
     // import 所需要的方法
+    import { Search } from '@element-plus/icons-vue'
     import { ServerDataRequest,colorFuntion,$staticData } from '@/apis/defineFunction'
     import {reactive, ref, watch} from 'vue'
     
@@ -62,9 +65,9 @@
         ]
     
     //setup会在创建的时候调用方法完成数据的获取
-    ServerDataRequest("/itemType/select").then((res) => {ItemType.values = res;});
-    ServerDataRequest("/MaxMap/select").then((res) => {MaxMap.values = res;});
-    ServerDataRequest("/SeasonOrActivity/daohang").then((res) => {SeasonOrActivity.values = res;});
+    ServerDataRequest("/itemType/select").then((res) => {ItemType.push(...res)});
+    ServerDataRequest("/MaxMap/select").then((res) => {MaxMap.push(...res);});
+    ServerDataRequest("/SeasonOrActivity/daohang").then((res) => {SeasonOrActivity.push(...res)});
     ServerDataRequest("/item/itemPage").then((res) => {Pages.value = res;});
     ItemPageSelect();
     
@@ -81,7 +84,7 @@
           "&season=" + UserSelectSeasson.value +
           "&Type=" + UserSelectItemType.value +
           "&Map=" + UserSelectMaxMap.value;
-        ServerDataRequest(SreachUrl).then((res) => {item.values = res;});
+        ServerDataRequest(SreachUrl).then((res) => {item.length = 0; item.push(...res)});
         sereachData.value = "";
     }
     
@@ -102,12 +105,12 @@
             "&season=" + UserSelectSeasson.value +
             "&Type=" + UserSelectItemType.value +
             "&Map=" + UserSelectMaxMap.value;
-          ServerDataRequest(TTTURL).then((res) => {item.values = res;});
+          ServerDataRequest(TTTURL).then((res) => {item.length = 0; item.push(...res)});
         }
     }
     
     function ItemPageSelect(){
-        ServerDataRequest("/item/select?id=" + NowPages.value).then((res) => {item.values = res;});
+        ServerDataRequest("/item/select?id=" + NowPages.value).then((res) => {item.length = 0; item.push(...res)});
     }
     
     function handleCurrentChange(val:number) {
