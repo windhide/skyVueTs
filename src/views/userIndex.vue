@@ -5,7 +5,7 @@
 			<ul id="cleft">
 				<div class="cleft_top">
 					<div class="cleft_topbg">
-						<div class="cleftbg_img"><img src="/api/image/tx.jpg" alt="头像"></div>
+						<div class="cleftbg_img"><img src="/api/image/tx.webp" alt="头像"></div>
 					</div>
 				    <div class="cleftbg_p" style="color:#409EFF" v-if="getloginUsername()!=''">{{"欢迎您登录!\t用户:"+getloginUsername()}}</div>
 					<div class="cleftbg_p" style="color:#409EFF" v-else>

@@ -2,7 +2,7 @@
  <div>
   <div class="nav02_kj" style="height: 600px">
     <div class="nav02_grzl_headimg">
-      <img src="/api/image/tx.jpg" alt="[头像]" />
+      <img src="/api/image/tx.webp" alt="[头像]" />
       <a href="mailto:WindHide520@gmail.com" target="_blank" rel="noopener noreferrer">联系我</a>
     </div>
     <div class="nav02_grzl_txt">
