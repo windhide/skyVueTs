@@ -84,15 +84,8 @@
     function UserSelect() {
         countReprint.length = 0
         if (Count_Sprit_Select.value != "选择复刻次数") {
-          Reprint.forEach((reprintItem:any) => {
-            let lock = true;
-            if(reprintItem.count == Count_Sprit_Select.value){
-              countReprint.forEach((item:any) => {
-                if(item.sprit.spritID == reprintItem.sprit.spritID) lock = !lock;
-              });
-              if(lock) countReprint.push(reprintItem);
-            }
-          });
+          let itemCache:any = Reprint.filter(((item:any) => item.count == Count_Sprit_Select.value))
+          countReprint.push(...itemCache.splice(0,itemCache.length/Number(Count_Sprit_Select.value)))
         }
     }
 </script>
