@@ -62,11 +62,10 @@
     function cellmouseenter(row:any, column:any, cell:any, event:any) {
         SelectReprint.value = row;
         ReprintTimer.length = 0
-        for (let i = 0; i < Reprint.length; i++) {
-          if (Reprint[i].spritID == SelectReprint.value.spritID) {
-              ReprintTimer.push(Reprint[i].reprintTime);
-          }
-        }
+        Reprint.forEach((reprint:any) => {
+          if (reprint.spritID == SelectReprint.value.spritID)
+            ReprintTimer.push(reprint.reprintTime)
+        });
     }
     
     function difference() {
