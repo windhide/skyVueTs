@@ -30,7 +30,7 @@
             <el-table-column align="center" prop="sprit.seasonOrActivity.srName" label="季节" width="90"   />
             <el-table-column align="center" prop="reprintTime" label="时间"  width="130"  />
        </el-table>
-       <el-table :data="CountReprint" @row-click="cellmouseenter"  :row-style="{height: '1px'}"  height="650" border stripe v-else>
+       <el-table :data="countReprint" @row-click="cellmouseenter"  :row-style="{height: '1px'}"  height="650" border stripe v-else>
             <el-table-column align="center" prop="reprintID" label="顺序" width="75" sortable   />
             <el-table-column align="center" prop="sprit.spritName" label="先祖" width="100" />
             <el-table-column align="center" prop="sprit.seasonOrActivity.srName" label="季节" width="90"   />
@@ -50,7 +50,7 @@
     let Count_Sprit_Select = ref("全部")
     let Count_Sprit:any = ref(["选择复刻次数", 1, 2, 3, "全部"])
     let Reprint:any = reactive([])
-    let CountReprint:any = reactive([])
+    let countReprint:any = reactive([])
     let ReprintTimer:String[] = reactive([])
     
     ServerDataRequest("/reprint/select").then((res) => {Reprint.push(...res) }) // !
@@ -62,17 +62,15 @@
     function cellmouseenter(row:any, column:any, cell:any, event:any) {
         SelectReprint.value = row;
         ReprintTimer.length = 0
-        Reprint.forEach((reprint:any) => {
-          if (reprint.spritID == SelectReprint.value.spritID)
-            ReprintTimer.push(reprint.reprintTime)
+        Reprint.forEach((reprintItem:any) => {
+          if (reprintItem.spritID == SelectReprint.value.spritID)
+            ReprintTimer.push(reprintItem.reprintTime)
         });
     }
     
     function difference() {
         let beginTime = ReprintTimer[ReprintTimer.length-1]
-        beginTime = beginTime.replace("年","-")
-        beginTime = beginTime.replace("月","-")
-        beginTime = beginTime.replace("日","-")
+        beginTime = beginTime.replace("年","-").replace("月","-").replace("日","-")
         const yy = new Date().getFullYear()
         const mm = new Date().getMonth() + 1
         const dd = new Date().getDate()
@@ -84,13 +82,17 @@
     }
     
     function UserSelect() {
-        CountReprint.length = 0
+        countReprint.length = 0
         if (Count_Sprit_Select.value != "选择复刻次数") {
-          for (let i = 0; i < Reprint.length; i++) {
-            if (Reprint[i].count == Count_Sprit_Select.value) {
-              CountReprint.push(Reprint[i]);
+          Reprint.forEach((reprintItem:any) => {
+            let lock = true;
+            if(reprintItem.count == Count_Sprit_Select.value){
+              countReprint.forEach((item:any) => {
+                if(item.sprit.spritID == reprintItem.sprit.spritID) lock = !lock;
+              });
+              if(lock) countReprint.push(reprintItem);
             }
-          }
+          });
         }
     }
 </script>
