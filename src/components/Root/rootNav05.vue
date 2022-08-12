@@ -30,7 +30,7 @@
             <el-button size="default"  @click="openDrawer('新增物品')" type="success" style="margin-top: 10px;" plain>添加复刻</el-button>
       </div>
       <div style="width:70%;margin:0px auto"  v-else >
-            <el-table :data="CountReprint" height="500" stripe >
+            <el-table :data="countReprint" height="500" stripe >
                 <el-table-column align="center" width="100" >
                     <template #default="scope">
                         <img :src="'/api/image/'+scope.row.sprit.spritLink" width="50" />
@@ -111,7 +111,7 @@
     let Count_Sprit:any  = ref(["选择复刻次数", 1, 2, 3, "全部"])
     let Reprint:any = reactive([])
     let Sprit:any = reactive([])
-    let CountReprint:any = reactive([])
+    let countReprint:any = reactive([])
     let SelectEditReprint:any = ref({
            reprintID:'',
            spritID:'',
@@ -214,13 +214,10 @@
             });
     }
     function UserSelect() {
-        CountReprint.length = 0
+       countReprint.length = 0
         if (Count_Sprit_Select.value != "选择复刻次数") {
-          for (let i = 0; i < Reprint.length; i++) {
-            if (Reprint[i].count == Count_Sprit_Select.value) {
-              CountReprint.push(Reprint[i]);
-            }
-          }
+          let itemCache:any = Reprint.filter(((item:any) => item.count == Count_Sprit_Select.value))
+          countReprint.push(...itemCache.splice(0,itemCache.length/Number(Count_Sprit_Select.value)))
         }
     }
 </script>
